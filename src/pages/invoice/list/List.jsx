@@ -56,7 +56,7 @@ import { Add, Edit, Eye, InfoCircle, More, ProfileTick, Trash } from 'iconsax-re
 import { formatDateUsingMoment, formattedDate } from 'utils/helper';
 import FormDialog from 'components/alertDialog/FormDialog';
 import axiosServices from 'utils/axios';
-import { USERTYPE } from 'constant';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import CompanyFilter from 'pages/trips/filter/CompanyFilter';
 import VendorFilter from 'pages/trips/filter/VendorFilter';
 import DriverFilter from 'pages/trips/filter/DriverFilter';
@@ -66,21 +66,25 @@ import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import PaidModal from '../others/PaidModal';
+import WrapperButton from 'components/common/guards/WrapperButton';
 
 const avatarImage = require.context('assets/images/users', true);
 
 const API_URL = {
   [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
-  [USERTYPE.isVendor]: '/invoice/all/vendor'
+  [USERTYPE.isVendor]: '/invoice/all/vendor',
+  [USERTYPE.iscabProviderUser]: '/invoice/by/cabProviderId',
+  [USERTYPE.isVendorUser]: '/invoice/all/vendor'
 };
 
-const INVOICE_STATUS = {
+export const INVOICE_STATUS = {
   UNPAID: 0,
   PAID: 1,
-  CANCELLED: 2
+  CANCELLED: 2,
+  PENDING: 3
 };
 
-const getTabName = (status) => {
+export const getTabName = (status) => {
   switch (status) {
     case INVOICE_STATUS.PAID:
       return 'Paid';
@@ -88,6 +92,8 @@ const getTabName = (status) => {
       return 'Unpaid';
     case INVOICE_STATUS.CANCELLED:
       return 'Cancelled';
+    case INVOICE_STATUS.PENDING:
+      return 'PENDING';
     default:
       return 'All';
   }
@@ -146,34 +152,22 @@ function ReactTable({ columns, data }) {
   // Map status codes to labels and colors
 
   // Create groups and counts
-  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID, INVOICE_STATUS.CANCELLED];
+  const groups = ['All', INVOICE_STATUS.PAID, INVOICE_STATUS.UNPAID, INVOICE_STATUS.CANCELLED, INVOICE_STATUS.PENDING];
 
   const countGroup = data.map((item) => item.status);
-  // console.log('countGroup', countGroup);
-  console.log('rows', rows);
 
   const counts = {
     Paid: countGroup.filter((status) => status === INVOICE_STATUS.PAID).length,
     Unpaid: countGroup.filter((status) => status === INVOICE_STATUS.UNPAID).length,
-    Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length
+    Cancelled: countGroup.filter((status) => status === INVOICE_STATUS.CANCELLED).length,
+    Pending: countGroup.filter((status) => status === INVOICE_STATUS.PENDING).length
   };
-
-  // console.log('counts', counts);
-  // console.log('page = ', page);
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
   useEffect(() => {
-    console.log('x = ', activeTab);
-
     setFilter('status', activeTab === 'All' ? '' : activeTab);
   }, [activeTab, setFilter]);
-
-  // useEffect(() => {
-  //   console.log('x = ', activeTab);
-  //   setFilter('status', activeTab === 'All' ? '' : activeTab === INVOICE_STATUS.UNPAID ? 1 : activeTab === INVOICE_STATUS.PAID ? 2 : 3);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [activeTab]);
 
   const filterData = rows.filter((row) => {
     if (activeTab === 'All') {
@@ -182,8 +176,6 @@ function ReactTable({ columns, data }) {
       return row.original.status === activeTab;
     }
   });
-
-  console.log('filterData', filterData);
 
   return (
     <>
@@ -204,6 +196,8 @@ function ReactTable({ columns, data }) {
                         ? counts.Paid
                         : status === INVOICE_STATUS.UNPAID
                         ? counts.Unpaid
+                        : status === INVOICE_STATUS.PENDING
+                        ? counts.Pending
                         : counts.Cancelled
                     }
                     color={
@@ -213,6 +207,8 @@ function ReactTable({ columns, data }) {
                         ? 'success'
                         : status === INVOICE_STATUS.UNPAID
                         ? 'warning'
+                        : status === INVOICE_STATUS.PENDING
+                        ? 'info'
                         : 'error'
                     }
                     variant="light"
@@ -251,7 +247,7 @@ function ReactTable({ columns, data }) {
             ))}
           </TableHead>
           <TableBody {...getTableBodyProps()}>
-            {filterData.map((row, i) => {
+            {filterData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).map((row, i) => {
               prepareRow(row);
               return (
                 <Fragment key={i}>
@@ -302,7 +298,6 @@ const List = () => {
   const [loading, setLoading] = useState(true);
   const { alertPopup } = useSelector((state) => state.invoice);
   const userType = useSelector((state) => state.auth.userType);
-  console.log(`🚀 ~ List ~ userType:`, userType);
 
   const [data, setData] = useState([]);
   const [metadata, setMetadata] = useState([]);
@@ -312,13 +307,11 @@ const List = () => {
     setRefetch((prev) => !prev);
   }, []);
 
-  console.log({ metadata });
-
   const [filterOptions, setFilterOptions] = useState({
     selectedCompany: {}
   });
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -328,11 +321,10 @@ const List = () => {
             // page: page,
             // limit: limit,
             invoiceStartDate: formatDateUsingMoment(startDate),
-            invoiceEndDate: formatDateUsingMoment(endDate),
-            companyId: filterOptions?.selectedCompany?._id
+            invoiceEndDate: formatDateUsingMoment(endDate)
+            // companyId: filterOptions?.selectedCompany?._id
           }
         });
-        console.log('response', response);
 
         setData(response.data.data);
         setMetadata(response.data?.metaData || {});
@@ -346,29 +338,6 @@ const List = () => {
 
     fetchInvoice();
   }, [userType, filterOptions, startDate, endDate, refetch]);
-
-  const handleClose = (status) => {
-    if (status) {
-      dispatch(getInvoiceDelete(invoiceId));
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Column deleted successfully',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          variant: 'alert',
-          alert: {
-            color: 'success'
-          },
-          close: false
-        })
-      );
-    }
-    dispatch(
-      alertPopupToggle({
-        alertToggle: false
-      })
-    );
-  };
 
   const columns = useMemo(
     () => [
@@ -396,7 +365,8 @@ const List = () => {
       {
         Header: 'Invoice Id',
         accessor: 'invoiceNumber',
-        disableFilters: true
+        disableFilters: true,
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Billed To',
@@ -404,13 +374,14 @@ const List = () => {
         disableFilters: true,
         Cell: ({ row }) => {
           const { values } = row;
+
           return (
             <Stack direction="row" spacing={1.5} alignItems="center">
               {/* <Avatar alt="Avatar" size="sm" src={avatarImage(`./avatar-${!values.avatar ? 1 : values.avatar}.png`)} /> */}
               <Stack spacing={0}>
-                <Typography variant="subtitle1">{values.billedTo.company_name}</Typography>
+                <Typography variant="subtitle1">{values.billedTo.name || 'N/A'}</Typography>
                 <Typography variant="caption" color="textSecondary">
-                  {values.billedTo.company_email}
+                  {values.billedTo.company_email || 'N/A'}
                 </Typography>
               </Stack>
             </Stack>
@@ -421,21 +392,21 @@ const List = () => {
         Header: 'Invoice Date',
         accessor: 'invoiceDate',
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Due Date',
         accessor: 'dueDate',
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Amount',
         accessor: 'grandTotal',
         Cell: ({ value }) => {
-          return <Typography>₹ {value}</Typography>;
+          return <Typography>₹ {(value === null || value === undefined ? 'N/A' : value)}</Typography>;
         }
       },
       {
@@ -448,7 +419,9 @@ const List = () => {
           } else if (value === 1) {
             return <Chip color="success" label="Paid" size="small" variant="light" />;
           } else if (value === 0) {
-            return <Chip color="info" label="Unpaid" size="small" variant="light" />;
+            return <Chip color="warning" label="Unpaid" size="small" variant="light" />;
+          } else if (value === 3) {
+            return <Chip color="info" label="Pending" size="small" variant="light" />;
           }
         }
       },
@@ -460,11 +433,8 @@ const List = () => {
           const [dialogOpen, setDialogOpen] = useState(false);
           const [formDialogOpen, setFormDialogOpen] = useState(false);
           const [newStatus, setNewStatus] = useState(null);
-          const [remarks, setRemarks] = useState('');
-          const token = localStorage.getItem('serviceToken');
           const theme = useTheme();
           const mode = theme.palette.mode;
-          const navigate = useNavigate();
           const [paidModalOpen, setPaidModalOpen] = useState(false);
           const [paidAmount, setPaidAmount] = useState(0);
 
@@ -479,7 +449,6 @@ const List = () => {
           const handleStatusChange = (status) => {
             setNewStatus(status);
             if (status === 2) {
-              // Open FormDialog if "Cancelled"
               setFormDialogOpen(true);
             } else {
               setDialogOpen(true); // Open confirmation dialog for other statuses
@@ -495,7 +464,6 @@ const List = () => {
           };
 
           const handleTextChange = (event) => {
-            console.log(`🚀 ~ handleTextChange ~ event:`, event);
             setRemarks(event.target.value);
           };
 
@@ -511,21 +479,31 @@ const List = () => {
 
           const confirmStatusChange = async (type, data) => {
             try {
-              console.log('🚀 ~ confirmStatusChange ~ data:', data);
               const response = await axiosServices.put(`/invoice/update/paymentStatus`, {
                 data: {
                   invoiceId: row.original._id,
+
                   status: newStatus,
                   remarks: newStatus === 2 ? remarks : undefined, // Include remarks if cancelled
                   ...(type === 'Paid' && { ...data })
                 }
+
+                // data: {
+                //   invoiceId: row.original._id,
+                //   transactionsId: 'VADE0B248932',
+                //   transactionsType: 'EXPENSE',
+                //   receivedAmount: 5000,
+                //   TDSRate: 10,
+                //   TDSAmount: 500,
+                //   status: 0
+                // }
               });
 
               if (response.status >= 200 && response.status < 300) {
                 dispatch(
                   openSnackbar({
                     open: true,
-                    message: response.data.message,
+                    message: 'Invoice Status Changed',
                     variant: 'alert',
                     alert: {
                       color: 'success'
@@ -564,27 +542,29 @@ const List = () => {
 
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.READ}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="View"
-              >
-                <IconButton
-                  color="success"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/apps/invoices/details/${row.original._id}`); // Use navigate for redirection
                   }}
+                  title="View"
                 >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="success"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`/apps/invoices/details/${row.original._id}`, '_blank', 'noopener,noreferrer');
+                    }}
+                  >
+                    <Eye />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
               {userType === USERTYPE.iscabProvider && (
                 <IconButton edge="end" aria-label="more actions" color="secondary" onClick={handleMenuClick}>
@@ -605,7 +585,6 @@ const List = () => {
                 <MenuItem onClick={() => handleStatusChange(0)}>Unpaid</MenuItem>
                 <MenuItem
                   onClick={() => {
-                    console.log('row = ', row.original);
                     handleOpenPaidModal(row.original.grandTotal);
                   }}
                 >
@@ -884,9 +863,11 @@ const List = () => {
           />
         </Stack>
 
-        <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/test')}>
-          Create Invoice
-        </Button>
+        <WrapperButton moduleName={MODULE.INVOICE} permission={PERMISSIONS.CREATE}>
+          <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={() => navigate('/apps/invoices/create')}>
+            Create Invoice
+          </Button>
+        </WrapperButton>
       </Stack>
       <MainCard content={false}>
         <ScrollX>

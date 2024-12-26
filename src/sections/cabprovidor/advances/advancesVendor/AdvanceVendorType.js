@@ -4,7 +4,8 @@ import ScrollX from 'components/ScrollX';
 import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import axiosServices from 'utils/axios';
-import ReactTable, { TableNoDataMessage } from 'components/tables/reactTable1/ReactTable';
+import ReactTable from 'components/tables/reactTable1/ReactTable';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 const AdvanceVendorType = () => {
   const [key, setKey] = useState(0);
@@ -44,7 +45,7 @@ const AdvanceVendorType = () => {
     const fetchdata = async () => {
         const providerId = JSON.parse(localStorage.getItem('providerId'));
         
-      const response = await axiosServices.get(`${process.env.REACT_APP_API_URL}/advanceType/all?cabProviderId=${providerId}`);
+      const response = await axiosServices.get(`${process.env.REACT_APP_API_URL}advanceType/all?cabProviderId=${providerId}`);
       if (response.status === 200) {
         setLoading(false);
       }
@@ -109,7 +110,7 @@ const AdvanceVendorType = () => {
               search
             />
           ) : (
-            <TableNoDataMessage text="No Advance Type Found" />
+            <EmptyTableDemo />
           )}
         </ScrollX>
       </MainCard>

@@ -21,8 +21,8 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                   <Stack spacing={2.5} alignItems="center">
                     <Avatar alt="Avatar 1" size="xl" src={data?.userImage} />
                     <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">{data?.userName}</Typography>
-                      <Typography color="secondary">{data?.userEmail}</Typography>
+                      <Typography variant="h5">{data?.userName || "N/A"}</Typography>
+                      <Typography color="secondary">{data?.userEmail || "N/A"}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -34,7 +34,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                         Billing Address
                       </Typography>
                       <Typography color="secondary">
-                      {data?.address}
+                      {data?.address || "N/A"}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -46,7 +46,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                         Shipping Address
                       </Typography>
                       <Typography color="secondary">
-                      {data?.address}
+                      {data?.address || "N/A"}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -111,7 +111,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.GSTIN}</Typography>
+                                  <Typography>{data1?.GSTIN || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -125,7 +125,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.PAN}</Typography>
+                                  <Typography>{data1?.PAN || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -146,7 +146,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.bankName}</Typography>
+                                  <Typography>{data1?.bankName || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -160,7 +160,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.accountHolderName}</Typography>
+                                  <Typography>{data1?.accountHolderName || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -174,7 +174,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.branchName}</Typography>
+                                  <Typography>{data1?.branchName || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -188,7 +188,7 @@ const Overview = ({ data, data1, vendorCompanyName }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.IFSC_code}</Typography>
+                                  <Typography>{data1?.IFSC_code || "N/A"}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>

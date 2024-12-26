@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
 // material-ui
-import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
 
 // project-imports
 import MainCard from 'components/MainCard';
 
 // assets
-import { Book, DocumentText, EmptyWallet, MoneyRecive, Routing2, WalletAdd, WalletMoney } from 'iconsax-react';
+import { Book, Routing2 } from 'iconsax-react';
 import Overview from 'sections/cabprovidor/cabManagement/cabOverview/Overview';
 import TripDetail from 'sections/cabprovidor/cabManagement/cabOverview/TripDetails';
-import axiosServices from 'utils/axios';
 import { dispatch, useSelector } from 'store';
 import { fetchCabDetails } from 'store/slice/cabProvidor/cabSlice';
 import CustomCircularLoader from 'components/CustomCircularLoader';
@@ -42,7 +41,7 @@ const CabOverview = () => {
 
   return (
     <>
-    <Breadcrumbs custom links={breadcrumbLinks} />
+      <Breadcrumbs custom links={breadcrumbLinks} />
       {loading ? (
         <CustomCircularLoader />
       ) : (
@@ -56,7 +55,7 @@ const CabOverview = () => {
 
               <Box sx={{ p: 3 }}>
                 {activeTab === 0 && <Overview />}
-                {activeTab === 1 && <TripDetail vehicleId={vehicleId}/>}
+                {activeTab === 1 && <TripDetail vehicleId={vehicleId} />}
               </Box>
 
               <Box sx={{ mt: 2.5 }}>

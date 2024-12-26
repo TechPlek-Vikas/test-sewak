@@ -95,7 +95,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
                 // onClick={(e) => e.stopPropagation()}
                 style={{ textDecoration: 'none' }}
               >
-                {userName}
+                {userName || 'N/A'}
               </Link>
             </Typography>
           );
@@ -108,7 +108,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
           const val = KEYS?.[userType].ROLE_NAME;
           const key = row.original[val];
           const roleName = key?.['role_name'];
-          return <>{roleName}</>;
+          return <>{roleName || 'N/A'}</>;
         }
       },
       // {
@@ -146,7 +146,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
           const val = KEYS?.[userType].CREATED_AT;
           const key = row.original[val];
           const time = key?.['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -157,7 +157,7 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
           const val = KEYS?.[userType].UPDATED_AT;
           const key = row.original[val];
           const time = key?.['updatedAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -166,22 +166,24 @@ const UserTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }
         className: 'cell-center',
         Cell: ({ row }) => {
           return (
-            <IconButton
-              size="medium"
-              color="error"
-              title="Manage Permission"
-              onClick={() => {
-                // alert(`Manage Permission = ${row.original._id}`);
-                const val = KEYS?.[userType].PERMISSION;
-                const key = row.original[val];
-                const uid = key?.['_id'];
+            <WrapperButton moduleName={MODULE.USER_SETTING} permission={PERMISSIONS.CREATE}>
+              <IconButton
+                size="medium"
+                color="error"
+                title="Manage Permission"
+                onClick={() => {
+                  // alert(`Manage Permission = ${row.original._id}`);
+                  const val = KEYS?.[userType].PERMISSION;
+                  const key = row.original[val];
+                  const uid = key?.['_id'];
 
-                // handleChangeUserId(row.original._id);
-                handleChangeUserId(uid);
-              }}
-            >
-              <Setting3 />
-            </IconButton>
+                  // handleChangeUserId(row.original._id);
+                  handleChangeUserId(uid);
+                }}
+              >
+                <Setting3 />
+              </IconButton>
+            </WrapperButton>
           );
         }
       }
@@ -258,7 +260,7 @@ const ButtonComponent = ({ loading }) => {
   return (
     <>
       <Stack direction="row" spacing={1} alignItems="center">
-        <WrapperButton moduleName={MODULE.USER} permission={PERMISSIONS.CREATE}>
+        <WrapperButton moduleName={MODULE.USER_SETTING} permission={PERMISSIONS.CREATE}>
           <Button
             variant="contained"
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading

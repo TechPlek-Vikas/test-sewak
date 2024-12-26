@@ -2,19 +2,19 @@ import PropTypes from 'prop-types';
 import { Grid, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'store';
-import { ApexPieChart } from '../components/ApexPieChart';
-import Badge from '../components/Badge';
-import Card from '../components/Card';
+import { ApexPieChart } from 'pages/reports/components/ApexPieChart';
+import Badge from 'pages/reports/components/Badge';
+import Card from 'pages/reports/components/Card';
 
 const labels = [
-  'Company Rate',
-  'Company Guard Price',
+  'Company Amount',
+  'Company Guard Amount',
   'Company Penalty',
-  'Vendor Rate',
-  'Vendor Guard Price',
+  'Vendor Amount',
+  'Vendor Guard Amount',
   'Vendor Penalty',
-  'Driver Rate',
-  'Driver Guard Price',
+  'Driver Amount',
+  'Driver Guard Amount',
   'Driver Penalty',
   'Add On Rate',
   'Toll Charge',
@@ -22,14 +22,14 @@ const labels = [
 ];
 
 const labelsMapping = {
-  'Company Rate': 'companyRate',
-  'Company Guard Price': 'companyGuardPrice',
+  'Company Amount': 'companyRate',
+  'Company Guard Amount': 'companyGuardPrice',
   'Company Penalty': 'companyPenalty',
-  'Driver Rate': 'driverRate',
-  'Driver Guard Price': 'driverGuardPrice',
+  'Driver Amount': 'driverRate',
+  'Driver Guard Amount': 'driverGuardPrice',
   'Driver Penalty': 'driverPenalty',
-  'Vendor Rate': 'vendorRate',
-  'Vendor Guard Price': 'vendorGuardPrice',
+  'Vendor Amount': 'vendorRate',
+  'Vendor Guard Amount': 'vendorGuardPrice',
   'Vendor Penalty': 'vendorPenalty',
   'Add On Rate': 'addOnRate',
   'Toll Charge': 'tollCharge',
@@ -68,10 +68,8 @@ const Analytic = () => {
           tripCount: acc.tripCount + (item?.tripCount || 0),
           companyIncomingAmount:
             acc.companyIncomingAmount + (item?.companyRate + (item?.companyGuardPrice || 0) - (item?.companyPenalty || 0)),
-          driverOutgoingAmount:
-            acc.driverOutgoingAmount + (item?.driverRate + (item?.driverGuardPrice || 0) - (item?.driverPenalty || 0)),
-          vendorOutgoingAmount:
-            acc.vendorOutgoingAmount + (item?.vendorRate + (item?.vendorGuardPrice || 0) - (item?.vendorPenalty || 0))
+          driverOutgoingAmount: acc.driverOutgoingAmount + (item?.driverRate + (item?.driverGuardPrice || 0) - (item?.driverPenalty || 0)),
+          vendorOutgoingAmount: acc.vendorOutgoingAmount + (item?.vendorRate + (item?.vendorGuardPrice || 0) - (item?.vendorPenalty || 0))
         }),
         {
           tripCount: 0,
@@ -114,18 +112,17 @@ const Analytic = () => {
     }
   }, [cabReportData]);
 
-
   return (
     <>
       <Stack gap={2}>
         <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
           {[
             { title: 'Total Trips', count: overAllData.tripCount },
-            { title: 'Income', count: overAllData.companyIncomingAmount, currency: true },
+            { title: 'Total Revenue', count: overAllData.companyIncomingAmount, currency: true },
             { title: 'Driver Expenses', count: overAllData.driverOutgoingAmount, currency: true },
             { title: 'Vendor Expenses', count: overAllData.vendorOutgoingAmount, currency: true },
             {
-              title: 'Total Revenue',
+              title: 'Income',
               count: overAllData.companyIncomingAmount - overAllData.driverOutgoingAmount - overAllData.vendorOutgoingAmount,
               currency: true
             }

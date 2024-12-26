@@ -1,15 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { openSnackbar } from 'store/reducers/snackbar';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching rosters by company id
 export const fetchCompaniesRosterFile = createAsyncThunk(
   'rosterFile/fetchCompaniesRosterFile',
   async ({ page, limit, startDate, endDate, companyID }, { rejectWithValue }) => {
     try {
+      console.log('companyId', companyID);
 
-      console.log("companyId",companyID);
-      
       // const response = await axios.get(`/cabProvider/roster/data/by?companyId=${id}`);
       let response = await axios.get(`/cabProvider/roster/data/by`, {
         params: {
@@ -98,13 +99,13 @@ const rosterFileSlice = createSlice({
       })
       .addCase(fetchCompaniesRosterFile.fulfilled, (state, action) => {
         state.rosterFiles = action.payload.data || [];
-        console.log(action.payload)
+        console.log(action.payload);
         state.metaData = {
           totalCount: action.payload.total || 0,
           page: action.payload.page || 1,
           limit: action.payload.limit || 10,
           lastPageNo: Math.ceil(action.payload.total / action.payload.limit) || 1,
-          metaData:action.payload.metadata
+          metaData: action.payload.metadata
         };
         state.loading = false;
       })
@@ -124,7 +125,8 @@ const rosterFileSlice = createSlice({
       .addCase(uploadRosterFile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

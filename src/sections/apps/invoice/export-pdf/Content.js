@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 
 // ==============================|| INVOICE EXPORT - CONTENT  ||============================== //
 
-const Content = ({ list }) => {
+const Content = ({ list, data }) => {
   const theme = useTheme();
   const subtotal = list?.invoice_detail?.reduce((prev, curr) => {
     if (curr.name.trim().length > 0) return prev + Number(curr.price * Math.floor(curr.qty));
@@ -105,22 +105,23 @@ const Content = ({ list }) => {
   const taxRate = (Number(list?.tax) * subtotal) / 100;
   const discountRate = (Number(list?.discount) * subtotal) / 100;
   const total = subtotal - discountRate + taxRate;
+
   return (
     <View style={styles.container}>
       <View style={[styles.row, styles.subRow]}>
         <View style={styles.card}>
           <Text style={[styles.title, { marginBottom: 8 }]}>From:</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.cashierInfo?.name}</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.cashierInfo?.address}</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.cashierInfo?.phone}</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.cashierInfo?.email}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedBy?.name}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedBy?.address}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedBy?.mobile}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedBy?.email}</Text>
         </View>
         <View style={styles.card}>
           <Text style={[styles.title, { marginBottom: 8 }]}>To:</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.customerInfo?.name}</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.customerInfo?.address}</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.customerInfo?.phone}</Text>
-          <Text style={[styles.caption, styles.pb5]}>{list?.customerInfo?.email}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedTo?.name}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedTo?.address}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedTo?.mobile}</Text>
+          <Text style={[styles.caption, styles.pb5]}>{data?.billedTo?.email}</Text>
         </View>
       </View>
       <View>
@@ -132,15 +133,15 @@ const Content = ({ list }) => {
           <Text style={[styles.tableTitle, styles.flex07]}>PRICE</Text>
           <Text style={[styles.tableTitle, styles.flex07]}>AMOUNT</Text>
         </View>
-        {list?.invoice_detail.map((row, index) => {
+        {data?.invoiceData.map((row, index) => {
           return (
             <View style={[styles.row, styles.tableRow]} key={row.id}>
               <Text style={[styles.tableCell, styles.flex03]}>{index + 1}</Text>
-              <Text style={[styles.tableCell, styles.flex17, { textOverflow: 'ellipsis' }]}>{row.name}</Text>
+              <Text style={[styles.tableCell, styles.flex17, { textOverflow: 'ellipsis' }]}>{row.itemName}</Text>
               <Text style={[styles.tableCell, styles.flex20]}>{row.description}</Text>
-              <Text style={[styles.tableCell, styles.flex07]}>{row.qty}</Text>
-              <Text style={[styles.tableCell, styles.flex07]}>{`$${Number(row.price).toFixed(2)}`}</Text>
-              <Text style={[styles.tableCell, styles.flex07]}>{`$${Number(row.price * row.qty).toFixed(2)}`}</Text>
+              <Text style={[styles.tableCell, styles.flex07]}>{row.quantity}</Text>
+              <Text style={[styles.tableCell, styles.flex07]}>{`₹${Number(row.rate).toFixed(2)}`}</Text>
+              <Text style={[styles.tableCell, styles.flex07]}>{`₹${Number(row.rate * row.quantity).toFixed(2)}`}</Text>
             </View>
           );
         })}
@@ -148,25 +149,50 @@ const Content = ({ list }) => {
       <View style={[styles.row, { paddingTop: 25, margin: 0, paddingRight: 25, justifyContent: 'flex-end' }]}>
         <View style={[styles.row, styles.amountRow]}>
           <Text style={styles.caption}>Sub Total:</Text>
-          <Text style={styles.tableCell}>${subtotal?.toFixed(2)}</Text>
+          <Text style={styles.tableCell}>₹{data?.totalAmount?.toFixed(2)}</Text>
         </View>
       </View>
       <View style={[styles.row, styles.amountSection]}>
         <View style={[styles.row, styles.amountRow]}>
           <Text style={styles.caption}>Discount:</Text>
-          <Text style={[styles.caption, { color: theme.palette.success.main }]}>${discountRate?.toFixed(2)}</Text>
+          <Text style={[styles.caption, { color: theme.palette.success.main }]}>₹{data.totalDiscount?.toFixed(2)}</Text>
         </View>
       </View>
       <View style={[styles.row, styles.amountSection]}>
         <View style={[styles.row, styles.amountRow]}>
           <Text style={styles.caption}>Tax:</Text>
-          <Text style={[styles.caption]}>${taxRate?.toFixed(2)}</Text>
+          <Text style={[styles.caption]}>₹{data.totalTax?.toFixed(2)}</Text>
         </View>
       </View>
+    
+      {data.MCDAmount > 0 && (
+        <View style={[styles.row, styles.amountSection]}>
+          <View style={[styles.row, styles.amountRow]}>
+            <Text style={styles.caption}>MCD Amount:</Text>
+            <Text style={[styles.caption]}>₹{data.MCDAmount?.toFixed(2)}</Text>
+          </View>
+        </View>
+      )}
+      {data.tollParkingCharges > 0 && (
+        <View style={[styles.row, styles.amountSection]}>
+          <View style={[styles.row, styles.amountRow]}>
+            <Text style={styles.caption}>Toll Charges:</Text>
+            <Text style={[styles.caption]}>₹{data.tollParkingCharges?.toFixed(2)}</Text>
+          </View>
+        </View>
+      )}
+      {data.additionalCharges > 0 && (
+        <View style={[styles.row, styles.amountSection]}>
+          <View style={[styles.row, styles.amountRow]}>
+            <Text style={styles.caption}>Additional Charges:</Text>
+            <Text style={[styles.caption]}>₹{data.additionalCharges?.toFixed(2)}</Text>
+          </View>
+        </View>
+      )}
       <View style={[styles.row, styles.amountSection]}>
         <View style={[styles.row, styles.amountRow]}>
           <Text style={styles.tableCell}>Grand Total:</Text>
-          <Text style={styles.tableCell}>${total % 1 === 0 ? total : total?.toFixed(2)}</Text>
+          <Text style={styles.tableCell}>₹{data?.grandTotal % 1 === 0 ? data?.grandTotal : data?.grandTotal?.toFixed(2)}</Text>
         </View>
       </View>
       <View style={[styles.row, { alignItems: 'flex-start', marginTop: 20, width: '95%' }]}>

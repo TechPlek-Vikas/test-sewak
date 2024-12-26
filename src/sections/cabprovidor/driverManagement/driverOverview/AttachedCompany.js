@@ -41,6 +41,7 @@ import ReactTable, { TableNoDataMessage } from 'components/tables/reactTable1/Re
 import { CSVExport } from 'components/tables/reactTable2/ReactTable';
 import VendorRateTable from 'pages/management/vendor/vendorRate/VendorRateTable';
 import axiosServices from 'utils/axios';
+import EmptyTableDemo from 'components/tables/EmptyTable';
 
 const avatarImage = require.context('assets/images/users', true);
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
@@ -213,9 +214,8 @@ const AttachedCompany = ({ driverId }) => {
     setOpen(false);
   }, []);
 
-  console.log("driverData",driverData);
-  console.log("companyId",companyId);
-  
+  console.log('driverData', driverData);
+  console.log('companyId', companyId);
 
   //  useEffect: Fetch assigned companies to a driver by driverId
 
@@ -271,23 +271,23 @@ const AttachedCompany = ({ driverId }) => {
       {
         Header: 'Company Name',
         accessor: 'company_name',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Company Email',
         accessor: 'company_email',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
 
       {
         Header: 'Mobile Number',
         accessor: 'mobile',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Address',
         accessor: 'address',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'View Rate',
@@ -350,7 +350,10 @@ const AttachedCompany = ({ driverId }) => {
           ) : driverData.length > 0 ? (
             <ReactTable columns={columns} data={driverData} hideHeader />
           ) : (
-            <TableNoDataMessage text="No Company Found" />
+            <>
+              {/* <TableNoDataMessage text="No Company Found" /> */}
+              <EmptyTableDemo />
+            </>
           )}
         </ScrollX>
       </MainCard>

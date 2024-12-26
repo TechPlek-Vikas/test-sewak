@@ -19,6 +19,8 @@ import BulkUploadDialog from './bulkUpload/Dialog';
 import { fetchAllVendors } from 'store/slice/cabProvidor/vendorSlice';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { Wrapper } from 'components/common/guards/Wrapper';
+import { STRATEGY } from 'components/common/PermissionStrategies';
 
 const OPTION_SET_1 = {
   ALL: {
@@ -49,7 +51,8 @@ const getInitialValues = (data) => {
       userName: '',
       userEmail: '',
       contactNumber: '',
-      vendorId: ''
+      vendorId: '',
+      officeChargeAmount: ''
     };
   }
 };
@@ -65,6 +68,7 @@ const Driver = () => {
   const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
   const [query, setQuery] = useState(null);
   const navigate = useNavigate();
+
   const handleAdd = useCallback(() => {
     dispatch(handleOpen(ACTION.CREATE));
   }, []);
@@ -122,15 +126,6 @@ const Driver = () => {
     }
   }, []);
 
-  // const yupSchema = Yup.object().shape({
-  //   userName: Yup.string().required('User Name is required'),
-  //   userEmail: Yup.string().email('Enter a valid email').required('User Email is required'),
-  //   contactNumber: Yup.string().required('Contact Number is required'),
-  //   vendorId: [USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)
-  //     ? Yup.string().required('Vendor is required')
-  //     : Yup.string()
-  // });
-
   const handleDriverBulkUploadOpen = () => {
     setOpenBulkUploadDialog(true);
   };
@@ -138,14 +133,17 @@ const Driver = () => {
     setOpenBulkUploadDialog(false);
   };
   const formikHandleSubmit = async (values, isCreating) => {
+    console.log('BIE');
+
     // eslint-disable-next-line no-useless-catch
     try {
       if (isCreating) {
         const payload = {
           data: {
             userName: values.userName,
-            userEmail: values.userEmail,
+            userEmail: values.userEmail || `tripBiller-${values.contactNumber}@gmail.com`,
             contactNumber: values.contactNumber,
+            officeChargeAmount: values.officeChargeAmount,
             // vendorId: values.vendorId
             ...([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(1) && values.vendorId && { vendorId: values.vendorId })
           }
@@ -158,6 +156,7 @@ const Driver = () => {
           setDriverType(1);
           dispatch(fetchDrivers({ page: 1, limit: 10, driverType: 1 }));
         }
+        return response;
       } else {
         // console.log('Update API call');
         // console.log({ selectedID });
@@ -245,12 +244,24 @@ const Driver = () => {
               </WrapperButton>
             </AccessControlWrapper>
 
-            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-                <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleDriverBulkUploadOpen}>
-                  Upload Driver List
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider, USERTYPE.isVendor]}>
+              <Wrapper
+                allowedPermission={{
+                  [MODULE.DRIVER]: [PERMISSIONS.CREATE]
+                }}
+                strategy={STRATEGY.ALL}
+              >
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                  onClick={handleDriverBulkUploadOpen}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Loading...' : 'Upload Driver List'}
                 </Button>
-              </WrapperButton>
+              </Wrapper>
             </AccessControlWrapper>
           </Stack>
         </Stack>
@@ -277,7 +288,12 @@ const Driver = () => {
           onSubmit={formikHandleSubmit}
         />
       )}
-      <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} />
+      <BulkUploadDialog
+        open={openBulkUploadDialog}
+        handleOpen={handleDriverBulkUploadOpen}
+        handleClose={handleDriverBulkUploadClose}
+        setUpdateKey={setUpdateKey}
+      />
     </>
   );
 };

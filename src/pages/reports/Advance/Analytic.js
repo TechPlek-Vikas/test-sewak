@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import { Grid, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'store';
-import { ApexPieChart } from '../components/ApexPieChart';
-import Badge from '../components/Badge';
-import Card from '../components/Card';
+import { ApexPieChart } from 'pages/reports/components/ApexPieChart';
+import Badge from 'pages/reports/components/Badge';
+import Card from 'pages/reports/components/Card';
 
 const labels = [
   'Company Rate',

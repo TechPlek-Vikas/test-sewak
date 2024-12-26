@@ -127,30 +127,57 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
   };
 
   // Columns for the Payment History table
+
   const personalDetailsColumns = [
-    { Header: 'Transaction Id', accessor: 'transactionId' },
-    { Header: 'Date', accessor: 'updatedAt', Cell: ({ value }) => formatDate(value) },
-    { Header: 'Approved Amount', accessor: 'approvedAmount', className: 'cell-center' },
-    { Header: 'Final Amount', accessor: 'finalAmount', className: 'cell-center' }
+    { 
+      Header: 'Transaction Id', 
+      accessor: 'transactionId', 
+      Cell: ({ value }) => value || 'N/A' 
+    },
+    { 
+      Header: 'Date', 
+      accessor: 'updatedAt', 
+      Cell: ({ value }) => value ? formatDate(value) : 'N/A' 
+    },
+    { 
+      Header: 'Approved Amount', 
+      accessor: 'approvedAmount', 
+      className: 'cell-center', 
+      Cell: ({ value }) => value || 'N/A' 
+    },
+    { 
+      Header: 'Final Amount', 
+      accessor: 'finalAmount', 
+      className: 'cell-center', 
+      Cell: ({ value }) => value || 'N/A' 
+    }
   ];
 
   // Columns for the Vehicle Details table
   const aboutMeColumns = [
-    { Header: 'Vehicle No.', accessor: 'vehicleNumber' },
-    { Header: 'Vehicle Name', accessor: 'vehicleName' },
+    { 
+      Header: 'Vehicle No.', 
+      accessor: 'vehicleNumber', 
+      Cell: ({ value }) => value || 'N/A' 
+    },
+    { 
+      Header: 'Vehicle Name', 
+      accessor: 'vehicleName', 
+      Cell: ({ value }) => value || 'N/A' 
+    },
     {
       Header: 'Driver Name',
       accessor: (row) => {
         const driver = row.linkedDriver?.[0]?.driverId;
-        return driver ? driver.userName : 'Not Linked';
-      }
+        return driver ? driver.userName : 'N/A';
+      },
     },
     {
       Header: 'Driver Contact',
       accessor: (row) => {
         const driver = row.linkedDriver?.[0]?.driverId;
-        return driver ? driver.contactNumber : 'Not Available';
-      }
+        return driver ? driver.contactNumber : 'N/A';
+      },
     }
   ];
 
@@ -182,10 +209,10 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Stack spacing={2.5} alignItems="center">
-                      <Avatar alt="Avatar 1" size="xl" src={personalDetails.userImage} />
+                      <Avatar alt="Avatar 1" size="xl" src={personalDetails.userImage || ''} />
                       <Stack spacing={0.5} alignItems="center">
-                        <Typography variant="h5">{personalDetails.userName}</Typography>
-                        <Typography color="secondary">+91-{personalDetails.contactNumber}</Typography>
+                        <Typography variant="h5">{personalDetails.userName || "N/A"}</Typography>
+                        <Typography color="secondary">+91-{personalDetails.contactNumber || "N/A"}</Typography>
                       </Stack>
                     </Stack>
                   </Grid>
@@ -244,7 +271,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Bank Name
                         </Typography>
                         <Typography
-                          title={personalDetails.bankName}
+                          title={personalDetails.bankName || "N/A"}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -253,7 +280,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.bankName}
+                          {personalDetails.bankName || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -263,7 +290,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Branch Name
                         </Typography>
                         <Typography
-                          title={personalDetails.branchName}
+                          title={personalDetails.branchName || "N/A"}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -272,7 +299,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.branchName}
+                          {personalDetails.branchName || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -282,7 +309,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           IFSC Code
                         </Typography>
                         <Typography
-                          title={personalDetails.IFSC_code}
+                          title={personalDetails.IFSC_code || "N/A"}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -291,7 +318,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.IFSC_code}
+                          {personalDetails.IFSC_code || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -301,7 +328,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Account Number
                         </Typography>
                         <Typography
-                          title={personalDetails.accountNumber}
+                          title={personalDetails.accountNumber || "N/A"}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -310,7 +337,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.accountNumber}
+                          {personalDetails.accountNumber || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -320,7 +347,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Account Holder Name
                         </Typography>
                         <Typography
-                          title={personalDetails.accountHolderName}
+                          title={personalDetails.accountHolderName || "N/A"}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -329,7 +356,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.accountHolderName}
+                          {personalDetails.accountHolderName || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -339,7 +366,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                           Address
                         </Typography>
                         <Typography
-                          title={personalDetails.bankAddress}
+                          title={personalDetails.bankAddress || "N/A"}
                           sx={{
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -348,7 +375,7 @@ const ExpandingUserDetail = ({ requestedById, isDriver, isVendor }) => {
                             textAlign: 'right' // Ensures it aligns to the end
                           }}
                         >
-                          {personalDetails.bankAddress}
+                          {personalDetails.bankAddress || "N/A"}
                         </Typography>
                       </Stack>
                     </Stack>

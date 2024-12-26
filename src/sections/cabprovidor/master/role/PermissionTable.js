@@ -2,7 +2,20 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
 // material-ui
-import { Box, Checkbox, Divider, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
 
 // project-imports
 import MainCard from 'components/MainCard';
@@ -128,9 +141,17 @@ export default function PermissionTable({ existedPermissions = {}, parentFunctio
       setSelectedPermissions(newPermissions);
       parentFunction(newPermissions);
     } else {
+      const nonSelected = rows
+        .map((n) => {
+          return n.moduleName;
+        })
+        .reduce((acc, curr) => {
+          acc[curr] = [];
+          return acc;
+        }, {});
       setSelected([]);
-      setSelectedPermissions({});
-      parentFunction({});
+      setSelectedPermissions(nonSelected);
+      parentFunction(nonSelected);
     }
   };
 
@@ -241,7 +262,19 @@ export default function PermissionTable({ existedPermissions = {}, parentFunctio
                         }}
                       />
                     </TableCell>
-                    <TableCell component="th" id={labelId} scope="row" padding="none">
+                    <TableCell
+                      component="th"
+                      id={labelId}
+                      scope="row"
+                      padding="none"
+                      sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                          fontWeight: 'bold',
+                          color: isItemSelected ? 'red' : 'green'
+                        }
+                      }} // Add pointer cursor for better UX
+                    >
                       {/* {row.moduleName } */}
                       {row.label}
                     </TableCell>
@@ -254,15 +287,33 @@ export default function PermissionTable({ existedPermissions = {}, parentFunctio
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 1
+                              gap: 1,
+                              '&:hover': {
+                                // backgroundColor: 'rgba(255, 0, 0, 0.1)', // Highlight with light red
+                                transform: 'scale(2.02)' // Slight zoom effect on hover
+                              },
+                              '&:hover .permission-label': {
+                                // color: 'red' // Change text color on hover
+                                color: selectedPermissions[row.moduleName]?.includes(permission) ? 'red' : 'green' // Red if selected, green if not
+                              },
+                              transition: 'transform 0.3s ease, background-color 0.3s ease' // Scale animation timing
                             }}
                             onClick={(event) => event.stopPropagation()} // Prevent row selection
                           >
-                            <Checkbox
+                            {/* <Checkbox
                               checked={selectedPermissions[row.moduleName]?.includes(permission) || false}
                               onChange={(event) => handlePermissionChange(event, permission, row.moduleName)}
                             />
-                            <Typography>{permission}</Typography>
+                            <Typography>{permission}</Typography> */}
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={selectedPermissions[row.moduleName]?.includes(permission) || false}
+                                  onChange={(event) => handlePermissionChange(event, permission, row.moduleName)}
+                                />
+                              }
+                              label={<Typography className="permission-label">{permission}</Typography>}
+                            />
                           </Box>
                         ))}
                       </Stack>

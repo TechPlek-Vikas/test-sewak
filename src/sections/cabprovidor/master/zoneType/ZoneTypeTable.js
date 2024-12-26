@@ -62,7 +62,7 @@ const ZoneTypeTable = ({ data, updateKey, setUpdateKey, loading }) => {
       setAlertOpen(false);
       if (deleteZoneType.fulfilled.match(resultAction)) {
         // If the action was fulfilled
-        setUpdateKey(updateKey + 1);
+        // setUpdateKey(updateKey + 1);
         dispatch(
           openSnackbar({
             open: true,
@@ -162,19 +162,23 @@ const ZoneTypeTable = ({ data, updateKey, setUpdateKey, loading }) => {
       },
       {
         Header: 'Zone Type',
-        accessor: 'zoneTypeName'
+        accessor: 'zoneTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone',
-        accessor: 'zoneId.zoneName'
+        accessor: 'zoneId.zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'ZoneId',
-        accessor: 'zoneId._id'
+        accessor: 'zoneId._id',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type Description',
-        accessor: 'zoneTypeDescription'
+        accessor: 'zoneTypeDescription',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Created At',
@@ -183,7 +187,7 @@ const ZoneTypeTable = ({ data, updateKey, setUpdateKey, loading }) => {
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -193,7 +197,7 @@ const ZoneTypeTable = ({ data, updateKey, setUpdateKey, loading }) => {
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['updatedAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {

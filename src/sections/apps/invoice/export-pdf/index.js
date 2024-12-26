@@ -22,16 +22,16 @@ const styles = StyleSheet.create({
 
 // ==============================|| INVOICE EXPORT  ||============================== //
 
-const ExportPDFView = ({ list }) => {
-  let title = list?.invoiceId || list?.invoice_id;
-  let customer_name = list?.customer_name || list?.from?.name || list?.customerInfo?.name;
+const ExportPDFView = ({ data, logo }) => {
+  let title = data?.invoiceNumber;
+  let customer_name = data?.billedTo?.name;
 
   return (
     <Document title={`${title} ${customer_name}`}>
       <Page size="A4" style={styles.page}>
-        <Header list={list} />
+        <Header data={data} logo={logo} />
         <View style={styles.container}>
-          <Content list={list} />
+          <Content data={data} />
         </View>
       </Page>
     </Document>

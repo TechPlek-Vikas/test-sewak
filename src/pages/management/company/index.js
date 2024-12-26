@@ -12,11 +12,13 @@ const Company = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [lastPageNo, setLastPageNo] = useState(Math.ceil(metaData.totalCount / metaData.limit) || 1);
-  const [query,setQuery] = useState(null);
+  const [query, setQuery] = useState(null);
+
+  console.log('metaData', metaData);
 
   useEffect(() => {
-    dispatch(fetchCompanies({ page: page, limit: limit , query:query}));
-  }, [dispatch, page, limit,query]);
+    dispatch(fetchCompanies({ page: page, limit: limit, query: query }));
+  }, [dispatch, page, limit, query]);
 
   // Debounced function to handle search input
   const handleSearch = useCallback(

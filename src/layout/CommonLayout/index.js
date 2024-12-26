@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 // material-ui
 import { Container, Toolbar } from '@mui/material';
@@ -41,6 +41,24 @@ const Loader = () => (
 
 const CommonLayout = ({ layout = 'blank' }) => {
   const { componentDrawerOpen } = useSelector((state) => state.menu);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  console.log(`🚀 ~ CommonLayout ~ isLoggedIn:`, isLoggedIn);
+
+  const navigate = useNavigate();
+
+  const location = useLocation();
+  console.log(`🚀 ~ CommonLayout ~ location:`, location);
+
+  useEffect(() => {
+    // DESC : redirect to login page if user is not logged In Page otherwise redirect to home page
+    if (location.pathname === '/') {
+      if (!isLoggedIn) {
+        navigate('/auth', { replace: true });
+      } else {
+        navigate('/home', { replace: true });
+      }
+    }
+  }, [isLoggedIn, navigate, location.pathname]);
 
   const handleDrawerOpen = () => {
     dispatch(openComponentDrawer({ componentDrawerOpen: !componentDrawerOpen }));

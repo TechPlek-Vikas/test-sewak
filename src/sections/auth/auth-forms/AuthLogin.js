@@ -14,10 +14,20 @@ import { ArrowRight, Eye, EyeSlash, Sms } from 'iconsax-react';
 import useScriptRef from 'hooks/useScriptRef';
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
-import { credentials } from 'constant';
+import { credentials, EMAIL_REGEX_PATTERN, MOBILE_NUMBER_REGEX_PATTERN } from 'constant';
 import useAuth from 'hooks/useAuth';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+
+// Validation schema with email or phone
+const validationSchema = Yup.object().shape({
+  identifier: Yup.string()
+    .required('Email or phone number is required')
+    .test('is-valid-identifier', 'Must be a valid email or phone number', (value) => {
+      return EMAIL_REGEX_PATTERN.test(value) || MOBILE_NUMBER_REGEX_PATTERN.test(value);
+    }),
+  password: Yup.string().max(255).required('Password is required')
+});
 
 // ============================|| JWT - LOGIN ||============================ //
 
@@ -26,6 +36,7 @@ const AuthLogin = () => {
   const scriptedRef = useScriptRef();
 
   const [showPassword, setShowPassword] = useState(false);
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -40,19 +51,30 @@ const AuthLogin = () => {
         initialValues={{
           // email: credentials.email,
           // password: credentials.password
-          email: '',
+          // email: '',
+          identifier: '',
           password: ''
         }}
-        validationSchema={Yup.object().shape({
-          email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-          password: Yup.string().max(255).required('Password is required')
-        })}
+        // validationSchema={Yup.object().shape({
+        //   email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+        //   password: Yup.string().max(255).required('Password is required')
+        // })}
+        validationSchema={validationSchema}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
-            await login(values.email, values.password);
+            const isEmail = EMAIL_REGEX_PATTERN.test(values.identifier);
+            const payload = isEmail
+              ? { userEmail: values.identifier, userPassword: values.password }
+              : { userMobileNumber: values.identifier, userPassword: values.password };
+
+            console.log(`🚀 ~ onSubmit= ~ payload:`, payload);
+
+            await login(payload);
             if (scriptedRef.current) {
               setStatus({ success: true });
               setSubmitting(false);
+
+              // alert('Login done');
             }
           } catch (err) {
             if (err.response.status === 400) {
@@ -80,7 +102,7 @@ const AuthLogin = () => {
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <Stack spacing={1}>
+                {/* <Stack spacing={1}>
                   <InputLabel htmlFor="email-login" style={{ color: 'black', fontWeight: '600' }}>
                     What is your Email?
                   </InputLabel>
@@ -103,6 +125,33 @@ const AuthLogin = () => {
                   {touched.email && errors.email && (
                     <FormHelperText error id="standard-weight-helper-text-email-login">
                       {errors.email}
+                    </FormHelperText>
+                  )}
+                </Stack> */}
+
+                <Stack spacing={1}>
+                  <InputLabel htmlFor="identifier-login" style={{ color: 'black', fontWeight: '600' }}>
+                    Email or Phone
+                  </InputLabel>
+                  <OutlinedInput
+                    id="identifier-login"
+                    type="text"
+                    value={values.identifier}
+                    name="identifier"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder="Enter email or phone number"
+                    color="secondary"
+                    fullWidth
+                    startAdornment={
+                      <InputAdornment position="start">
+                        <Sms />
+                      </InputAdornment>
+                    }
+                  />
+                  {touched.identifier && errors.identifier && (
+                    <FormHelperText error id="standard-weight-helper-text-identifier-login">
+                      {errors.identifier}
                     </FormHelperText>
                   )}
                 </Stack>

@@ -73,7 +73,7 @@ const AddDriverRateDialog = ({
     handleSelectedDriverName(selectedDriverName);
     setSelectedCompany(selectedCompany); // Save selected company
     setDriverID1(driverID);
-    onClose();
+    onClose(true);
   };
 
   const onCancel = () => {
@@ -94,10 +94,6 @@ const AddDriverRateDialog = ({
       <DialogTitle>Select Company and Driver</DialogTitle>
       <DialogContent>
         <Grid container spacing={1} sx={{ padding: '8px' }}>
-          <Grid item xs={6}>
-            <InputLabel sx={{ marginBottom: '4px' }}>Company Name</InputLabel>
-            <SearchComponent setSelectedCompany={setSelectedCompanyLocal} />
-          </Grid>
           <Grid item xs={6}>
             <InputLabel sx={{ marginBottom: '4px' }}>Driver</InputLabel>
             <Autocomplete
@@ -127,13 +123,18 @@ const AddDriverRateDialog = ({
               )}
             />
           </Grid>
+
+          <Grid item xs={6}>
+            <InputLabel sx={{ marginBottom: '4px' }}>Company Name</InputLabel>
+            <SearchComponent setSelectedCompany={setSelectedCompanyLocal} />
+          </Grid>
         </Grid>
       </DialogContent>
       <DialogActions sx={{ padding: '8px' }}>
-        <Button onClick={onCancel} color="secondary">
+        <Button onClick={onClose} color="secondary">
           Cancel
         </Button>
-        <Button onClick={handleSave} color="primary">
+        <Button onClick={handleSave} color="primary" disabled={!selectedCompany || !driverID}>
           Save
         </Button>
       </DialogActions>
@@ -169,7 +170,6 @@ const DriverRate = () => {
   const handleSelectedDriverName = (vendorName) => {
     setSelectedDriverName(vendorName);
   };
-  
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -195,8 +195,10 @@ const DriverRate = () => {
     navigate('/management/driver/add-driver-rate');
   };
 
-  const handleDialogClose = () => {
+  const handleDialogClose = (flag = false) => {
+    console.log(`🚀 ~ handleDialogClose ~ flag:`, flag);
     setDialogOpen(false);
+    !flag && navigate('/management/driver/view', { replace: true });
   };
 
   const handleCompanySelect = (company) => {

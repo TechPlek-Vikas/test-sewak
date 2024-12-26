@@ -67,6 +67,7 @@ const NavCollapse = ({ menu, level, parentId, setSelectedItems, selectedItems, s
   const [selected, setSelected] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
+  // console.log('selected = ', selected);
   const handleClick = (event) => {
     setAnchorEl(null);
     setSelectedLevel(level);

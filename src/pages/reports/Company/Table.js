@@ -29,72 +29,86 @@ const Table = () => {
       },
       {
         Header: 'Company Name',
-        accessor: 'company_name'
+        accessor: 'company_name',
+         Cell: ({ value }) => value || 'N/A'
         // disableSortBy: true
       },
       {
         Header: 'Trip Count',
-        accessor: 'tripCount'
+        accessor: 'tripCount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Company Guard Price',
-        accessor: 'companyGuardPrice'
+        accessor: 'companyGuardPrice',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Company Rate',
-        accessor: 'companyRate'
+        accessor: 'companyRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Company Penalty',
-        accessor: 'companyPenalty'
+        accessor: 'companyPenalty',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Vendor Guard Price',
-        accessor: 'vendorGuardPrice'
+        accessor: 'vendorGuardPrice',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Vendor Rate',
-        accessor: 'vendorRate'
+        accessor: 'vendorRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Vendor Penalty',
-        accessor: 'vendorPenalty'
+        accessor: 'vendorPenalty',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Driver Guard Price',
-        accessor: 'driverGuardPrice'
+        accessor: 'driverGuardPrice',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Driver Rate',
-        accessor: 'driverRate'
+        accessor: 'driverRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Driver Penalty',
-        accessor: 'driverPenalty'
+        accessor: 'driverPenalty',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Add On Rate',
-        accessor: 'addOnRate'
+        accessor: 'addOnRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'MCD Charge',
-        accessor: 'mcdCharge'
+        accessor: 'mcdCharge',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       },
       {
         Header: 'Toll Charge',
-        accessor: 'tollCharge'
+        accessor: 'tollCharge',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
         // disableSortBy: true
       }
     ],

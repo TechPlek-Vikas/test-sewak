@@ -16,7 +16,7 @@ import {
 // project-imports
 import MainCard from 'components/MainCard';
 import { DocumentDownload, Warning2 } from 'iconsax-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 // import VendorSelection from './VendorSelection';
 import * as XLSX from 'xlsx';
@@ -26,6 +26,7 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import { enqueueSnackbar, useSnackbar } from 'notistack';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import VehicleTypeSelection from 'SearchComponents/VehicleTypeSelectionAutoComplete';
+import { isDateInFuture, isRequiredString, isValueInExpectedValues, separateValidAndInvalidItems } from 'pages/management/driver/helper';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -39,10 +40,47 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 });
 
+const EXPECTED_VAL = ['YES', 'NO'];
+
+const MANDATORY_HEADERS = ['vendor ID', 'vehicle Type ID*', 'Vehicle Number*', 'Model Name*'];
+
+const OPTIONAL_HEADERS = [
+  'Fitness Date (DD/MM/YYYY)',
+  'Insurance Expiry Date (DD/MM/YYYY)',
+  'Pollution Expiry Date (DD/MM/YYYY)',
+  'Permit Expiry Date (1 Year) (DD/MM/YYYY)',
+  "Permit Expiry Date (5 Year's) (DD/MM/YYYY)"
+];
+
+const fieldMapping = {
+  1: 'Vehicle Type ID',
+  2: 'Vehicle Number',
+  3: 'Modal Name',
+
+  4: 'Fitness Date',
+  5: 'Insurance Expiry Date',
+  6: 'Pollution Expiry Date',
+  7: `Permit Expiry Date (1 Year)`,
+  8: `Permit Expiry Date (5 Year's)`
+};
+
+const validationRules = {
+  1: isRequiredString,
+  2: isRequiredString,
+  3: isRequiredString,
+
+  4: isDateInFuture,
+  5: isDateInFuture,
+  6: isDateInFuture,
+  7: isDateInFuture,
+  8: isDateInFuture
+};
+
 const BulkUploadDialog = ({ open, handleClose }) => {
   const [files, setFiles] = useState(null);
-  const [vehicleData, setvehicleData] = useState(null);
+  const [vehicleData, setVehicleData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [invalidData, setInvalidData] = useState([]);
   const { closeSnackbar } = useSnackbar();
 
   const handleFileChange = (event) => {
@@ -71,20 +109,55 @@ const BulkUploadDialog = ({ open, handleClose }) => {
       const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
       console.log({ jsonData });
-      // Map the data to the desired format
-      const mappedData = jsonData.slice(1).map((row) => {
-        console.log(row);
-        const [vendorId, vehicletype, vehicleNumber, vehicleName] = row;
+      // // Map the data to the desired format
+      // const mappedData = jsonData.slice(1).map((row) => {
+      //   console.log(row);
+      //   const [vendorId, vehicletype, vehicleNumber, vehicleName] = row;
+      //   return {
+      //     vehicletype: vehicletype,
+      //     vehicleNumber: vehicleNumber,
+      //     vehicleName: vehicleName,
+      //     vendorId: vendorId || null
+      //   };
+      // });
+
+      // console.log({ mappedData }); // Log the mapped data
+      // setVehicleData(mappedData); // Set the mapped data to state
+
+      const { validItems, invalidItems } = separateValidAndInvalidItems(jsonData.slice(1), validationRules, fieldMapping);
+      console.log(`🚀 ~ handleExcelDataExtraction ~ invalidItems:`, invalidItems);
+      console.log(`🚀 ~ handleExcelDataExtraction ~ validItems:`, validItems);
+
+      if (invalidItems.length > 0) {
+        const items = invalidItems.map((entry) => {
+          const reasons = Object.entries(entry.errors)
+            .map(([field, message], index) => `${index + 1}. ${field} : ${message}`)
+            .join('\n');
+
+          return [...entry.item, `Reasons :\n${reasons}`];
+        });
+        console.log('items = ', items);
+
+        setInvalidData(items);
+      }
+
+      const mappedData = validItems.map((row) => {
         return {
-          vehicletype: vehicletype,
-          vehicleNumber: vehicleNumber,
-          vehicleName: vehicleName,
-          vendorId: vendorId || null
+          vendorId: row[0],
+          vehicletype: row[1],
+          vehicleNumber: row[2],
+          vehicleName: row[3],
+
+          fitnessDate: row[4],
+          insuranceExpiryDate: row[5],
+          pollutionExpiryDate: row[6],
+          permitOneYrExpiryDate: row[7],
+          permitFiveYrExpiryDate: row[8]
         };
       });
 
       console.log({ mappedData }); // Log the mapped data
-      setvehicleData(mappedData); // Set the mapped data to state
+      setVehicleData(mappedData); // Set the mapped data to state
 
       // Set loading to false after processing is done
       setLoading(false);
@@ -150,85 +223,165 @@ const BulkUploadDialog = ({ open, handleClose }) => {
     XLSX.writeFile(workbook, 'failedVehicleData.xlsx');
   };
 
-  const handleSave = async () => {
-    if (!vehicleData || vehicleData.length === 0) {
-      alert('Excel Sheet Empty');
-      return;
-    }
-    setLoading(true);
+  const handleViewClickForInvalid = useCallback((data) => {
+    // alert(`handleViewClickForInvalid ${data.length}`);
+    console.log('DATA = ', data);
 
-    let successCount = 0;
-    let failureCount = 0;
-    let failureData = [];
+    const driverHeaders = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS, 'Reasons'];
 
-    // Loop through the vehicleData array and send the requests
-    for (const item of vehicleData) {
-      try {
-        console.log({ item });
-        const formData = new FormData();
+    const HeaderLength = driverHeaders.length;
 
-        // Append each field from the item object to FormData
-        formData.append('vehicletype', item.vehicletype);
-        formData.append('vehicleNumber', item.vehicleNumber);
-        formData.append('vehicleName', item.vehicleName);
-        formData.append('vendorId', item.vendorId);
-
-        const response = await axiosServices.post('/vehicle/add', formData);
-        console.log(response.data);
-
-        // If the response indicates success, increment successCount
-        if (response.status === 201) {
-          successCount++;
-        }
-      } catch (error) {
-        console.error('Error registering vehicle:', error);
-
-        // On failure, increment failureCount and add failure data
-        failureCount++;
-        failureData.push(item); // Store failed item
+    const output = data.map((row) => {
+      // Add `null` to the end of the row until its length matches the required length
+      while (row.length < HeaderLength) {
+        row.splice(-1, 0, null); // Add nulls before the last item
       }
-    }
-
-    setCount({
-      successCount,
-      failureCount,
-      failureData
+      return row;
     });
 
-    // Show success or failure messages based on results
-    if (successCount > 0) {
+    console.log('output = ', output);
+
+    // Create the second sheet (headers + data if available)
+    const vendorSheet = XLSX.utils.aoa_to_sheet([
+      driverHeaders,
+      ...data // Will be empty if no data
+    ]);
+    // Create a workbook and append the sheets
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, vendorSheet, 'Invalid Cab Data');
+
+    // Export the Excel file
+    XLSX.writeFile(workbook, 'InvalidCabData.xlsx');
+  }, []);
+
+  const actionTaskForInvalidData = useCallback(
+    (snackbarId, data) => (
+      <Stack direction="row" spacing={0.5}>
+        <Button
+          size="small"
+          color="error"
+          variant="contained"
+          onClick={() => {
+            handleViewClickForInvalid(data);
+          }}
+        >
+          View Invalid Data
+        </Button>
+        <Button size="small" color="secondary" variant="contained" onClick={() => closeSnackbar(snackbarId)}>
+          Dismiss
+        </Button>
+      </Stack>
+    ),
+    [closeSnackbar, handleViewClickForInvalid]
+  );
+
+  const handleSave = async () => {
+    try {
+      if (!vehicleData || vehicleData.length === 0) {
+        alert('Excel Sheet Empty');
+        return;
+      }
+      setLoading(true);
+
+      let successCount = 0;
+      let failureCount = 0;
+      let failureData = [];
+
+      // Loop through the vehicleData array and send the requests
+      for (const item of vehicleData) {
+        try {
+          console.log({ item });
+          const formData = new FormData();
+
+          // Append each field from the item object to FormData
+          formData.append('vehicletype', item.vehicletype);
+          formData.append('vehicleNumber', item.vehicleNumber);
+          formData.append('vehicleName', item.vehicleName);
+          formData.append('vendorId', item.vendorId || null);
+          item.fitnessDate && formData.append('fitnessDate', item.fitnessDate);
+          item.insuranceExpiryDate && formData.append('insuranceExpiryDate', item.insuranceExpiryDate);
+          item.pollutionExpiryDate && formData.append('pollutionExpiryDate', item.pollutionExpiryDate);
+          item.permitOneYrExpiryDate && formData.append('permitOneYrExpiryDate', item.permitOneYrExpiryDate);
+          item.permitFiveYrExpiryDate && formData.append('permitFiveYrExpiryDate', item.permitFiveYrExpiryDate);
+
+          const response = await axiosServices.post('/vehicle/add', formData);
+          console.log(response.data);
+
+          // If the response indicates success, increment successCount
+          if (response.status === 201) {
+            successCount++;
+          }
+        } catch (error) {
+          console.error('Error registering vehicle:', error);
+
+          // On failure, increment failureCount and add failure data
+          failureCount++;
+          failureData.push(item); // Store failed item
+        }
+      }
+
+      setCount({
+        successCount,
+        failureCount,
+        failureData
+      });
+
+      // Show success or failure messages based on results
+      if (successCount > 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: `${successCount} vehicles Saved Successfully`,
+            variant: 'alert',
+            alert: {
+              color: 'success'
+            },
+            close: false,
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'right'
+            }
+          })
+        );
+      }
+
+      if (failureCount > 0) {
+        enqueueSnackbar(`${failureCount} vehicles Failed to Save`, {
+          action: (key) => actionTask(key, failureData),
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }
+        });
+      }
+
+      // Reset states and close dialog
+      setFiles(null);
+      setVehicleData(null);
+      setLoading(false);
+      handleClose();
+    } catch (error) {
+      console.log('error', error);
       dispatch(
         openSnackbar({
           open: true,
-          message: `${successCount} vehicles Saved Successfully`,
+          message: error.message || 'Something went wrong',
           variant: 'alert',
-          alert: {
-            color: 'success'
-          },
-          close: false,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'right'
-          }
+          alert: { color: 'error' },
+          close: true
         })
       );
+    } finally {
+      if (invalidData.length > 0) {
+        enqueueSnackbar(`${invalidData.length} Vendors Invalid Data`, {
+          action: (key) => actionTaskForInvalidData(key, invalidData),
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }
+        });
+      }
     }
-
-    if (failureCount > 0) {
-      enqueueSnackbar(`${failureCount} vehicles Failed to Save`, {
-        action: (key) => actionTask(key, failureData),
-        anchorOrigin: {
-          vertical: 'bottom',
-          horizontal: 'right'
-        }
-      });
-    }
-
-    // Reset states and close dialog
-    setFiles(null);
-    setvehicleData(null);
-    setLoading(false);
-    handleClose();
   };
 
   return (
@@ -291,7 +444,8 @@ function ChildModal() {
 
   const handleDownload = () => {
     // Headers for "vehicle Data" sheet
-    const vehicleData = ['vendor ID', 'vehicle Type ID*', 'Vehicle Number*', 'Model Name*']; // No data, just headers
+    // const vehicleData = ['vendor ID', 'vehicle Type ID*', 'Vehicle Number*', 'Model Name*']; // No data, just headers
+    const vehicleData = [...MANDATORY_HEADERS, ...OPTIONAL_HEADERS]; // No data, just headers
 
     // Create the first sheet (headers only)
     const vehicleSheet = XLSX.utils.aoa_to_sheet([vehicleData]);
@@ -337,7 +491,7 @@ function ChildModal() {
     }
 
     // Export the Excel file
-    XLSX.writeFile(workbook, 'BulkVehicleUploadSheet.xlsx');
+    XLSX.writeFile(workbook, 'BulkCabUploadSheet.xlsx');
   };
 
   return (

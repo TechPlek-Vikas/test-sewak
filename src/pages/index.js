@@ -39,7 +39,7 @@ const Dashboard = () => {
   const theme = useTheme();
 
   // const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange();
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   // console.log('range', range);
   // console.log('prevRange', prevRange);
@@ -105,27 +105,33 @@ const Dashboard = () => {
       },
       {
         Header: 'Company Name',
-        accessor: 'company_Name'
+        accessor: 'company_Name',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Total Route',
-        accessor: 'totalRoute'
+        accessor: 'totalRoute',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Total Company Revenue',
-        accessor: 'totalCompanyRevenue'
+        accessor: 'totalCompanyRevenue',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Total Vendor Revenue',
-        accessor: 'totalVendRevenue'
+        accessor: 'totalVendRevenue',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Total Driver Revenue',
-        accessor: 'totalDriverRevenue'
+        accessor: 'totalDriverRevenue',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Net Profit',
-        accessor: 'netProfit'
+        accessor: 'netProfit',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       }
     ],
     []

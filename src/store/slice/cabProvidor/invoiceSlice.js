@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   data: [], // Empty array initially
@@ -31,7 +33,9 @@ const invoiceSlice = createSlice({
       state.error = null;
     }
   },
-  extraReducers: (builder) => {}
+  extraReducers: (builder) => {
+    builder.addCase(logoutActivity, handleReset(initialState));
+  }
 });
 
 // Export the reducer and actions

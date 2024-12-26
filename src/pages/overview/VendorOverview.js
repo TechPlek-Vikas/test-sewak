@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
 // material-ui
@@ -20,6 +21,16 @@ import { APP_DEFAULT_PATH } from 'config';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import TripDetail from 'sections/cabprovidor/vendorManagement/vendorOverview/TripDetails';
 import AdvanceVendor from 'sections/cabprovidor/vendorManagement/vendorOverview/AdvanceVendor';
+import { USERTYPE } from 'constant';
+import { useSelector } from 'store';
+
+const tabConfig = [
+  { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider] },
+  { label: 'Trips', icon: <Routing2 />, access: [USERTYPE.iscabProvider] },
+  { label: 'Advance', icon: <TableDocument />, access: [USERTYPE.iscabProvider] },
+  { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider] },
+  { label: 'Attached Companies', icon: <Buliding />, access: [USERTYPE.iscabProvider] }
+];
 
 const VendorOverview = () => {
   const { id } = useParams(); // used to extract companyId to fetch company Data
@@ -30,6 +41,8 @@ const VendorOverview = () => {
   const [vendorSpecificDetail, setVendorSpecificDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const vendorCompanyName = vendorSpecificDetail?.vendorCompanyName;
+
+  const { userType } = useSelector((state) => state.auth);
 
   //  useEffect: Get vendor's details by vendorId
 
@@ -170,6 +183,9 @@ const VendorOverview = () => {
   // Usage in your Transaction component
   const data = generateRandomTransactions(10);
 
+  // Filter the tabs based on userType
+  const filteredTabs = tabConfig.filter((tab) => !tab.access || tab.access.includes(userType));
+
   return (
     <>
       <Breadcrumbs custom links={breadcrumbLinks} />
@@ -189,26 +205,20 @@ const VendorOverview = () => {
         <MainCard border={false}>
           <Box>
             <Tabs value={activeTab} onChange={handleChange} aria-label="Profile Tabs">
-              <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Trips" icon={<Routing2 />} iconPosition="start" />
-              <Tab label="Advance" icon={<TableDocument />} iconPosition="start" />
-              <Tab label="Invoice" icon={<Bill />} iconPosition="start" />
-              {/* <Tab label="Statement" icon={<EmptyWallet />} iconPosition="start" /> */}
-              <Tab label="Attached Companies" icon={<Buliding />} iconPosition="start" />
-              {/* <Tab label="Vehicle List" icon={<Car />} iconPosition="start" />
-              <Tab label="Driver List" icon={<Profile2User />} iconPosition="start" /> */}
+              {filteredTabs.map((tab, index) => (
+                <Tab key={index} label={tab.label} icon={tab.icon} iconPosition="start" />
+              ))}
             </Tabs>
 
-            <Box sx={{ p: 3 }}>
-              {activeTab === 0 && <Overview data={vendorDetail} data1={vendorSpecificDetail} vendorCompanyName={vendorCompanyName}/>}
-              {activeTab === 1 && <TripDetail vendorId={vendorId} />}
-              {activeTab === 2 && <AdvanceVendor vendorId={vendorId} />}
-              {activeTab === 3 && <Transaction data={data} />}
-              {/* {activeTab === 2 && <Mails />} */}
-              {/* {activeTab === 4 && <Statement />} */}
-              {/* {activeTab === 4 && <Loan data={data}/>} */}
-              {activeTab === 5 && <AttachedCompany vendorId={vendorId} />}
-            </Box>
+            <TabContent
+              activeTab={activeTab}
+              filteredTabs={filteredTabs}
+              vendorDetail={vendorDetail}
+              vendorId={vendorId}
+              vendorSpecificDetail={vendorSpecificDetail}
+              vendorCompanyName={vendorCompanyName}
+              data={data}
+            />
           </Box>
           <Box sx={{ mt: 2.5 }}>
             <Outlet />
@@ -220,3 +230,30 @@ const VendorOverview = () => {
 };
 
 export default VendorOverview;
+
+const TabContent = ({ activeTab, vendorDetail, vendorId, vendorSpecificDetail, vendorCompanyName, data, filteredTabs }) => {
+  // Dynamic components array based on filteredTabs
+  const components = {
+    Overview: <Overview data={vendorDetail} data1={vendorSpecificDetail} vendorCompanyName={vendorCompanyName} />,
+    Trips: <TripDetail vendorId={vendorId} />,
+    Advance: <AdvanceVendor vendorId={vendorId} />,
+    Invoice: <Transaction data={data} />,
+    'Attached Companies': <AttachedCompany vendorId={vendorId} />
+  };
+
+  // Get the active tab label
+  const activeTabLabel = filteredTabs[activeTab]?.label;
+
+  // Render the corresponding component
+  return <Box sx={{ p: 3 }}>{components[activeTabLabel]}</Box>;
+};
+
+TabContent.propTypes = {
+  activeTab: PropTypes.number.isRequired,
+  vendorDetail: PropTypes.object.isRequired,
+  vendorId: PropTypes.string.isRequired,
+  vendorSpecificDetail: PropTypes.object.isRequired,
+  vendorCompanyName: PropTypes.string.isRequired,
+  data: PropTypes.array.isRequired,
+  filteredTabs: PropTypes.array.isRequired
+};

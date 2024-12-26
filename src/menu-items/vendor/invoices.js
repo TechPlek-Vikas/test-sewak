@@ -14,7 +14,7 @@ const icons = {
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
 
 const invoices = {
-  id: 'group-setting',
+  id: 'invoices-setting',
   title: <FormattedMessage id="expense management" />,
   type: 'group',
   icon: icons.samplePage,
@@ -40,7 +40,7 @@ const invoices = {
       title: <FormattedMessage id="advance" />,
       type: 'item',
       icon: icons.advance,
-      url: '/apps/invoices/advance',
+      url: '/apps/invoices/advance'
       // children: [
       //   {
       //     id: 'advance-type',

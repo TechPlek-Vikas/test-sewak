@@ -16,6 +16,8 @@ import { minWidth } from '@mui/system';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { downloadCompanyWiseReport } from '../utils/DownloadCompanyWiseReport';
 import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const CompanyReports = () => {
   const [company, setCompany] = useState(null);
@@ -23,7 +25,7 @@ const CompanyReports = () => {
 
   const { loading, companyReportData } = useSelector((state) => state.report);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     console.log({ selectedCompanies });
@@ -98,8 +100,6 @@ const CompanyReports = () => {
           </Stack>
 
           <Stack direction={'row'} gap={2}>
-            {/* Download Report */}
-
             {/* Date Filter */}
             <DateRangeSelect
               startDate={startDate}
@@ -110,16 +110,21 @@ const CompanyReports = () => {
               onRangeChange={handleRangeChange}
               showSelectedRangeLabel
             />
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-            >
-              Download Report
-            </Button>
+
+            {/* Download Report */}
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

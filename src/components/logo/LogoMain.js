@@ -1,29 +1,19 @@
 import PropTypes from 'prop-types';
-
-// material-ui
-import { useTheme } from '@mui/material/styles';
-
-import logoDark from 'assets/images/logo.png';
-import logo from 'assets/images/logo.png';
-import { ThemeMode } from 'config';
-import { useSelector } from 'store';
-import { CircularProgress } from '@mui/material';
+import samplelogo from 'assets/images/logo.png';
+import useAuth from 'hooks/useAuth';
 
 // ==============================|| LOGO SVG ||============================== //
 
 const LogoMain = () => {
-  const theme = useTheme();
-  const logos = useSelector((state) => state.accountSettings.settings?.logo);
-  const name = useSelector((state) => state.accountSettings.settings?.name);
-  console.log(logos);
-  // return <img src={theme.palette.mode === ThemeMode.DARK ? logoDark : logo} alt="icon logo" width="100" />;
-  // return <img src={logos || logo} alt="icon logo" width="100" />;
+  const { accountSetting } = useAuth();
 
-  // if (!logos) {
-  //   return <CircularProgress />;
-  // }
+  const { logo = samplelogo, name = 'logo' } = accountSetting || {};
+  // console.log("logo",logo);
+  // console.log("accountSetting",accountSetting);
+  // console.log("samplelogo",samplelogo);
+  
 
-  return <img src={logos || logo} alt={name} width="100" />;
+  return <img src={logo || samplelogo} alt={name} width="100" />;
 };
 
 LogoMain.propTypes = {

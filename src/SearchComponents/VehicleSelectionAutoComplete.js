@@ -86,7 +86,11 @@ const VehicleSelection = ({ sx, value, setSelectedOptions }) => {
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option.vehicleNumber}
+            <div>
+              {option.vehicleNumber}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.vehicleTypeName || 'N/A'}</span>
+            </div>
           </li>
         )}
         renderInput={(params) => <TextField {...params} placeholder="Select Vehicles" />}

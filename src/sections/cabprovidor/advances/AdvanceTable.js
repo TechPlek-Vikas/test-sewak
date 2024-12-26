@@ -1,9 +1,23 @@
 import PropTypes from 'prop-types';
-import { Button, Chip, CircularProgress, Dialog, Stack, Switch, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, useTheme } from '@mui/material';
+import {
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  Stack,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo, useState } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import PaginationBox from 'components/tables/Pagination';
 import { ThemeMode } from 'config';
 import AdvanceForm from './AdvanceForm';
@@ -14,6 +28,7 @@ import WrapperButton from 'components/common/guards/WrapperButton';
 import { MODULE, PERMISSIONS } from 'constant';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import EmptyTableDemo from 'components/tables/EmptyTable';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const AdvanceTable = ({ data, page, setPage, limit, setLimit, lastPageNo, key, setKey, loading }) => {
   const theme = useTheme();
@@ -225,17 +240,29 @@ function ReactTable({ columns: userColumns, data }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>

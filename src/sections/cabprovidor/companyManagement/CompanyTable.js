@@ -25,7 +25,7 @@ import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Add, ArrowDown2, ArrowRight2, Edit } from 'iconsax-react';
 import { Fragment, useCallback, useMemo, useState } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import WrapperButton from 'components/common/guards/WrapperButton';
@@ -40,13 +40,13 @@ import { fetchCompanies, setSelectedID, updateCompanyBranchStatus, updateCompany
 import CompanyFilter1 from 'pages/trips/filter/CompanyFilter1';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
 import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-
 
   const handleAddCompany = () => {
     navigate('/management/company/add-company');
@@ -67,6 +67,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         Header: () => null,
         id: 'expander',
         className: 'cell-center',
+        disableSortBy: true,
         Cell: ({ row }) => {
           const collapseIcon = row.isExpanded ? <ArrowDown2 size={14} /> : <ArrowRight2 size={14} />;
           let branch = row.original.Branches;
@@ -105,7 +106,7 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
               >
-                {formattedValue}
+                {formattedValue || 'N/A'}
               </Link>
             </Typography>
           );
@@ -114,12 +115,12 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
       {
         Header: 'Address',
         accessor: 'address',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'City',
         accessor: 'city',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'State',
@@ -132,20 +133,22 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
         //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         //     .join(' ');
         // }
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Total Vehicle',
-        accessor: 'totalVehicles'
+        accessor: 'totalVehicles',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Total Income',
-        accessor: 'totalEarnedIncome'
+        accessor: 'totalEarnedIncome',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Amount Receivable',
         accessor: 'stateTaxAmount',
-        Cell: ({ value }) => value || 'None'
+       Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Status',
@@ -263,34 +266,36 @@ const CompanyTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loadin
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
               <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
-                      }
-                    }
-                  }}
-                  title="Edit"
-                >
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const id = row.original._id;
-                      const isSubRow = !Array.isArray(row.original.Branches);
-                      console.log('row = ', row);
-                      if (isSubRow) {
-                        navigate(`/management/company/edit-company-branch/${id}`);
-                      } else {
-                        navigate(`/management/company/edit/${id}`);
+                <WrapperButton moduleName={MODULE.COMPANY} permission={PERMISSIONS.UPDATE}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
                       }
                     }}
+                    title="Edit"
                   >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const id = row.original._id;
+                        const isSubRow = !Array.isArray(row.original.Branches);
+                        console.log('row = ', row);
+                        if (isSubRow) {
+                          navigate(`/management/company/edit-company-branch/${id}`);
+                        } else {
+                          navigate(`/management/company/edit/${id}`);
+                        }
+                      }}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                </WrapperButton>
               </AccessControlWrapper>
             </Stack>
           );
@@ -550,13 +555,14 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <>
       <Table {...getTableProps()}>
-        <TableHead>
+        {/* <TableHead>
           {headerGroups.map((headerGroup) => (
             <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column) => (
@@ -566,7 +572,20 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent }) {
               ))}
             </TableRow>
           ))}
+        </TableHead> */}
+
+        <TableHead>
+          {headerGroups.map((headerGroup) => (
+            <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+              {headerGroup.headers.map((column) => (
+                <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                  <HeaderSort column={column} sort />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
         </TableHead>
+
         <TableBody {...getTableBodyProps()}>
           {rows.map((row, i) => {
             prepareRow(row);

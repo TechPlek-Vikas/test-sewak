@@ -101,9 +101,16 @@ const Cab = () => {
               </Button>
             </WrapperButton>
             <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
-              <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.CREATE}>
-                <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleVehicleBulkUploadOpen}>
-                  Upload Vehicle List
+              <WrapperButton moduleName={MODULE.CAB} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />} // Show loading spinner if loading
+                  onClick={handleVehicleBulkUploadOpen}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Loading...' : 'Upload Vehicle List'}
                 </Button>
               </WrapperButton>
             </AccessControlWrapper>

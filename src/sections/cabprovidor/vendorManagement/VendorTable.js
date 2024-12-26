@@ -22,13 +22,13 @@ import {
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo, useState } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import { Link, useNavigate } from 'react-router-dom';
 import PaginationBox from 'components/tables/Pagination';
 import Header from 'components/tables/genericTable/Header';
 import { Add, Eye, Edit } from 'iconsax-react';
 import WrapperButton from 'components/common/guards/WrapperButton';
-import { ACTION, MODULE, PERMISSIONS } from 'constant';
+import { ACTION, MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import EmptyTableDemo from 'components/tables/EmptyTable';
 import TableSkeleton from 'components/tables/TableSkeleton';
 import { ThemeMode } from 'config';
@@ -37,6 +37,9 @@ import { handleClose, handleOpen, setDeletedName, setSelectedID, updateVendorSta
 import AlertDelete from 'components/alertDialog/AlertDelete';
 import { openSnackbar } from 'store/reducers/snackbar';
 import DebouncedSearch from 'components/textfield/DebounceSearch';
+import AccessControlWrapper from 'components/common/guards/AccessControlWrapper';
+import { BulkUploadDialog } from 'pages/management/vendor/bulkUpload/Dialog';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setQuery }) => {
   const { remove, deletedName, selectedID } = useSelector((state) => state.vendors);
@@ -45,10 +48,18 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   const theme = useTheme();
   const mode = theme.palette.mode;
   const [search, setSearch] = useState('');
+  const [openBulkUploadDialog, setOpenBulkUploadDialog] = useState(false);
 
   // Search change handler
   const onSearchChange = (value) => {
     setSearch(value); // Update the search state
+  };
+
+  const handleDriverBulkUploadOpen = () => {
+    setOpenBulkUploadDialog(true);
+  };
+  const handleDriverBulkUploadClose = () => {
+    setOpenBulkUploadDialog(false);
   };
 
   const columns = useMemo(
@@ -73,7 +84,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none' }}
               >
-                {formattedValue}
+                {formattedValue || 'N/A'}
               </Link>
             </Typography>
           );
@@ -81,19 +92,23 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
       },
       {
         Header: 'Address',
-        accessor: 'officeAddress'
+        accessor: 'officeAddress',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'State',
-        accessor: 'officeState'
+        accessor: 'officeState',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Vehicles',
-        accessor: 'totalVehicle'
+        accessor: 'totalVehicle',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Drivers',
-        accessor: 'totalDrivers'
+        accessor: 'totalDrivers',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Status',
@@ -234,52 +249,56 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 </IconButton>
               </Tooltip> */}
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.READ}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="View Rate"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
                   }}
+                  title="View Rate"
                 >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/management/vendor/view-vendor-rate?vendorID=${vendorID}`);
+                    }}
+                  >
+                    <Eye />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.UPDATE}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const id = row.original.vendorId;
-                    console.log('Id = ', id);
-                    navigate(`/management/vendor/edit/${id}`);
-                    // dispatch(setSelectedID(row.values._id));
                   }}
+                  title="Edit"
                 >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const id = row.original.vendorId;
+                      console.log('Id = ', id);
+                      navigate(`/management/vendor/edit/${id}`);
+                      // dispatch(setSelectedID(row.values._id));
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
               {/* <Tooltip
                 componentsProps={{
@@ -425,6 +444,7 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 {loading ? 'Loading...' : 'Add Vendor'}
               </Button>
             </WrapperButton>
+
             <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
               <Button
                 variant="contained"
@@ -437,6 +457,21 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 {loading ? 'Loading...' : 'Add Vendor Rate'}
               </Button>
             </WrapperButton>
+
+            <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
+              <WrapperButton moduleName={MODULE.VENDOR} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Add />}
+                  onClick={handleDriverBulkUploadOpen}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Loading...' : 'Upload Vendor List'}
+                </Button>
+              </WrapperButton>
+            </AccessControlWrapper>
           </Stack>
         </Stack>
         <MainCard content={false}>
@@ -451,12 +486,16 @@ const VendorTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           </ScrollX>
         </MainCard>
         <Box>
-          {data.length > 0 && (
+          {data.length > 0 && !loading && (
             <PaginationBox pageIndex={page} gotoPage={setPage} pageSize={limit} setPageSize={setLimit} lastPageIndex={lastPageNo} />
           )}
         </Box>
       </Stack>
       {/* {remove && <AlertDelete title={deletedName} open={remove} handleClose={handleCloseDialog} />} */}
+
+      {openBulkUploadDialog && (
+        <BulkUploadDialog open={openBulkUploadDialog} handleOpen={handleDriverBulkUploadOpen} handleClose={handleDriverBulkUploadClose} />
+      )}
     </>
   );
 };
@@ -484,17 +523,29 @@ function ReactTable({ columns: userColumns, data }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>

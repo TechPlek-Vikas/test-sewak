@@ -4,47 +4,59 @@ import { useState } from 'react';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
 // assets
-import { Clipboard, I24Support, Lock1, Messages1, Profile } from 'iconsax-react';
+import { Bill, Setting2 } from 'iconsax-react';
+import { useNavigate } from 'react-router';
+import { MdManageAccounts } from 'react-icons/md';
+import { CiSettings } from 'react-icons/ci';
 
 // ==============================|| HEADER PROFILE - SETTING TAB ||============================== //
 
 const SettingTab = () => {
+  const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const handleListItemClick = (event, index) => {
+
+  const handleListItemClick = (event, index, navigationCallback) => {
     setSelectedIndex(index);
+    if (navigationCallback) navigationCallback();
   };
 
   return (
     <List component="nav" sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
-      <ListItemButton selected={selectedIndex === 0} onClick={(event) => handleListItemClick(event, 0)}>
+      <ListItemButton
+        selected={selectedIndex === 0}
+        onClick={(event) => handleListItemClick(event, 0, () => navigate('/settings/account'))}
+      >
         <ListItemIcon>
-          <I24Support variant="Bulk" size={18} />
+          <MdManageAccounts variant="Bulk" size={18} />
         </ListItemIcon>
-        <ListItemText primary="Support" />
+        <ListItemText primary="Account Setting" />
       </ListItemButton>
-      <ListItemButton selected={selectedIndex === 1} onClick={(event) => handleListItemClick(event, 1)}>
+      <ListItemButton
+        selected={selectedIndex === 1}
+        onClick={(event) => handleListItemClick(event, 1, () => navigate('/management/user/view'))}
+      >
         <ListItemIcon>
-          <Profile variant="Bulk" size={18} />
+          <Setting2 variant="Bulk" size={18} />
         </ListItemIcon>
-        <ListItemText primary="Account Settings" />
+        <ListItemText primary="User Setting" />
       </ListItemButton>
-      <ListItemButton selected={selectedIndex === 2} onClick={(event) => handleListItemClick(event, 2)}>
+      <ListItemButton
+        selected={selectedIndex === 2}
+        onClick={(event) => handleListItemClick(event, 2, () => navigate('/settings/invoice'))}
+      >
         <ListItemIcon>
-          <Lock1 variant="Bulk" size={18} />
+          <Bill variant="Bulk" size={18} />
         </ListItemIcon>
-        <ListItemText primary="Privacy Center" />
+        <ListItemText primary="Invoice Setting" />
       </ListItemButton>
-      <ListItemButton selected={selectedIndex === 3} onClick={(event) => handleListItemClick(event, 3)}>
+      <ListItemButton
+        selected={selectedIndex === 3}
+        onClick={(event) => handleListItemClick(event, 3, () => navigate('/settings/roster/create-template'))}
+      >
         <ListItemIcon>
-          <Messages1 variant="Bulk" size={18} />
+          <CiSettings variant="Bulk" size={18} />
         </ListItemIcon>
-        <ListItemText primary="Feedback" />
-      </ListItemButton>
-      <ListItemButton selected={selectedIndex === 4} onClick={(event) => handleListItemClick(event, 4)}>
-        <ListItemIcon>
-          <Clipboard variant="Bulk" size={18} />
-        </ListItemIcon>
-        <ListItemText primary="History" />
+        <ListItemText primary="Roster Setting" />
       </ListItemButton>
     </List>
   );

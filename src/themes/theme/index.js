@@ -14,7 +14,6 @@ import Theme8 from './theme8';
 // ==============================|| PRESET THEME - THEME SELECTOR ||============================== //
 
 const Theme = (presetColor, mode) => {
-  console.log(`🚀 ~ Theme ~ presetColor:`, presetColor);
   switch (presetColor) {
     case 'theme1':
       return Theme1(mode);

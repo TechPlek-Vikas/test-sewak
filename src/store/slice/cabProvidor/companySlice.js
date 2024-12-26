@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { openSnackbar } from 'store/reducers/snackbar';
 import axios from 'utils/axios';
 import { commonInitialState, commonReducers } from '../common';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching companies
 export const fetchCompanies = createAsyncThunk('companies/fetchCompanies', async ({ page, limit, query }, { rejectWithValue }) => {
@@ -344,7 +346,8 @@ const companySlice = createSlice({
       .addCase(fetchCompaniesAssignedDrivers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

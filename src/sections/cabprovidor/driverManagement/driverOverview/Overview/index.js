@@ -1,14 +1,11 @@
-// material-ui
 import { Grid, List, ListItem, Stack, Typography } from '@mui/material';
-
-// project-imports
 import MainCard from 'components/MainCard';
 import Avatar from 'components/@extended/Avatar';
 import OverviewGraph from './OverviewGraph';
 
-// ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
-
 const Overview = ({ data, data1 }) => {
+  console.log("data",data);
+  
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6} md={6} xl={6}>
@@ -18,10 +15,11 @@ const Overview = ({ data, data1 }) => {
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Stack spacing={2.5} alignItems="center">
-                    <Avatar alt="Avatar 1" size="xl" src={data?.userImage} />
+                    <Avatar alt="Avatar 1" size="xl" src={data?.userImage || ''} />
                     <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">{data?.userName}</Typography>
-                      <Typography color="secondary">{data?.userEmail}</Typography>
+                      <Typography variant="h5">{data?.userName || 'N/A'}</Typography>
+                      <Typography color="secondary">{data?.userEmail || 'N/A'}</Typography>
+                      <Typography color="secondary">+91-{data?.contactNumber || 'N/A'}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -32,7 +30,7 @@ const Overview = ({ data, data1 }) => {
                       <Typography variant="h6" color="primary">
                         Billing Address
                       </Typography>
-                      <Typography color="secondary">{data?.address}</Typography>
+                      <Typography color="secondary">{data?.address || 'N/A'}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -42,7 +40,7 @@ const Overview = ({ data, data1 }) => {
                       <Typography variant="h6" color="primary">
                         Shipping Address
                       </Typography>
-                      <Typography color="secondary">{data?.address}</Typography>
+                      <Typography color="secondary">{data?.address || 'N/A'}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -106,7 +104,7 @@ const Overview = ({ data, data1 }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.GSTIN}</Typography>
+                                  <Typography>{data1?.GSTIN || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -120,7 +118,7 @@ const Overview = ({ data, data1 }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.PAN}</Typography>
+                                  <Typography>{data1?.PAN || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -141,7 +139,7 @@ const Overview = ({ data, data1 }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.bankName}</Typography>
+                                  <Typography>{data1?.bankName || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -155,7 +153,7 @@ const Overview = ({ data, data1 }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.accountHolderName}</Typography>
+                                  <Typography>{data1?.accountHolderName || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -169,7 +167,7 @@ const Overview = ({ data, data1 }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.branchName}</Typography>
+                                  <Typography>{data1?.branchName || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -183,7 +181,7 @@ const Overview = ({ data, data1 }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>{data1?.IFSC_code}</Typography>
+                                  <Typography>{data1?.IFSC_code || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>

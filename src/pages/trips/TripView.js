@@ -54,7 +54,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.companyID?.company_name}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.companyID?.company_name || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -63,7 +63,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{formatDateUsingMoment(tripDetails?.tripDate, 'YYYY-MM-DD')}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.tripDate ? formatDateUsingMoment(tripDetails?.tripDate, 'YYYY-MM-DD'): 'N/A'}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -72,7 +72,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.tripTime}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.tripTime || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -81,7 +81,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.zoneNameID?.zoneName}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.zoneNameID?.zoneName || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -90,7 +90,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.zoneTypeID?.zoneTypeName}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.zoneTypeID?.zoneTypeName || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -99,7 +99,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.vehicleNumber?.vehicleNumber}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.vehicleNumber?.vehicleNumber || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -108,7 +108,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.vehicleTypeID?.vehicleTypeName}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.vehicleTypeID?.vehicleTypeName || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -117,7 +117,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.driverId?.userName}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.driverId?.userName || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -126,7 +126,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.location}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.location || "N/A"}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -135,7 +135,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.remarks}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.remarks || "N/A"}</Typography>
                     </Grid>
                   </Grid>
 
@@ -146,7 +146,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.companyRate}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.companyRate || 0}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -173,7 +173,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.vendorRate}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.vendorRate || 0}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -200,7 +200,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.driverRate}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.driverRate || 0}</Typography>
                     </Grid>
 
                     <Grid item xs={5}>
@@ -227,7 +227,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.addOnRate}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.addOnRate || 0}</Typography>
                     </Grid>
                     <Grid item xs={5}>
                       <Typography variant="textSecondary" color="textSecondary">
@@ -235,7 +235,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.mcdCharge}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.mcdCharge || 0}</Typography>
                     </Grid>
                     <Grid item xs={5}>
                       <Typography variant="textSecondary" color="textSecondary">
@@ -243,7 +243,7 @@ export default function TransitionsModal({ isOpen, onClose, selectedTripId }) {
                       </Typography>
                     </Grid>
                     <Grid item xs={7}>
-                      <Typography variant="textSecondary">{tripDetails?.tollCharge}</Typography>
+                      <Typography variant="textSecondary">{tripDetails?.tollCharge || 0}</Typography>
                     </Grid>
                   </Grid>
                 </Stack>

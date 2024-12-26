@@ -15,26 +15,28 @@ const CompanyRateReactTable = ({ data, page, setPage, limit, setLimit, loading }
     () => [
       {
         Header: 'Zone Name',
-        accessor: 'zoneNameID.zoneName'
+        accessor: 'zoneNameID.zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type',
         accessor: 'zoneTypeID.zoneTypeName',
-        Cell: ({ row }) => row.original.zoneTypeID?.zoneTypeName ?? 'None'
+        Cell: ({ row }) => row.original.zoneTypeID?.zoneTypeName ?? 'N/A'
       },
       {
         Header: 'Vehicle Type',
-        accessor: (row) => row.VehicleTypeName?.vehicleTypeName || 'No vehicle type'
+        accessor: (row) => row.VehicleTypeName?.vehicleTypeName || 'N/A'
       },
       {
         Header: 'Amount',
-        accessor: 'cabAmount.amount'
+        accessor: 'cabAmount.amount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Dual Trip Amount',
         accessor: 'dualTripAmount.amount',
         dataType: 'text',
-        Cell: ({ row }) => row.original.dualTripAmount?.amount ?? 'None'
+        Cell: ({ row }) => row.original.dualTripAmount?.amount ?? 'N/A'
       },
       {
         Header: 'Guard Price',

@@ -73,11 +73,11 @@ import AccessControlWrapper from 'components/common/guards/AccessControlWrapper'
 
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-const TRIP_STATUS = {
+export const TRIP_STATUS = {
   PENDING: 1,
   COMPLETED: 2,
   CANCELLED: 3,
-  UNATTENDED: 4
+  INVOICE: 101
 };
 
 const POPUP_TYPE = {
@@ -93,8 +93,8 @@ const getTabName = (status) => {
       return 'Completed';
     case TRIP_STATUS.CANCELLED:
       return 'Cancelled';
-    case TRIP_STATUS.UNATTENDED:
-      return 'Unattended';
+    case TRIP_STATUS.INVOICE:
+      return 'Invoice';
     default:
       return 'All';
   }
@@ -170,7 +170,7 @@ const DeleteButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
 
   return (
     <>
-      {visible && selected && selected.length > 0 && (
+      {selected && selected.length > 0 && (
         <>
           <Button
             variant="contained"
@@ -327,7 +327,7 @@ const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
   }, []);
   return (
     <>
-      {visible && selected && selected.length > 0 && (
+      {selected && selected.length > 0 && (
         <>
           <Button
             variant="contained"
@@ -365,24 +365,21 @@ const ChangeStatusButton = ({ selected = [], visible, handleRefetch }) => {
   );
 };
 
-const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetch }) => {
+const GenerateInvoiceButton = ({ selected = [], visible }) => {
   const [remove, setRemove] = useState(false);
   const [loading, setLoading] = useState(false);
   const [invoiceTripData, setInvoiceTripData] = useState([]);
   const navigate = useNavigate();
-  console.log({ selected });
+  console.log({ tripData: selected });
 
   useEffect(() => {
     if (selected && selected.length > 0) {
-      const filteredData = selected.filter((item) => item.invoiceId === null);
-      setInvoiceTripData(filteredData);
+      setInvoiceTripData(selected);
     }
   }, [selected]);
 
-  console.log({ invoiceTripData });
   const handleTripGeneration = () => {
-    console.log({ selected });
-    navigate('/apps/invoices/test', { state: { tripData: invoiceTripData } });
+    navigate('/apps/invoices/create', { state: { tripData: invoiceTripData } });
   };
 
   const handleCloseForRemove = useCallback(() => {
@@ -391,7 +388,7 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
 
   return (
     <>
-      {visible && invoiceTripData && invoiceTripData.length > 0 && (
+      {invoiceTripData && invoiceTripData.length > 0 && (
         <>
           <Button
             variant="contained"
@@ -424,19 +421,17 @@ const GenerateInvoiceButton = ({ selected = [], visible, deleteURL, handleRefetc
 function ReactTable({
   columns,
   data,
-  deleteButton = false,
   deleteURL,
   handleRefetch,
   handleOpen,
-  handleTripSelectedData,
-  tripSelectedData,
-  otherSelectedData,
-  handleOtherSelectedData,
-  selectedData,
-  handleSelectedData
+  generateInvoiceData,
+  changeTripStatusData,
+  deleteTripData,
+  handleGenerateInvoiceData,
+  handleDeleteTripData,
+  handleChangeTripStatusData
 }) {
   const theme = useTheme();
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('sm'));
   const defaultColumn = useMemo(() => ({ Filter: DateColumnFilter }), []);
   const filterTypes = useMemo(() => renderFilterTypes, []);
   const initialState = useMemo(
@@ -454,7 +449,6 @@ function ReactTable({
     headerGroups,
     prepareRow,
     rows,
-    page,
     gotoPage,
     setPageSize,
     state: { pageIndex, pageSize },
@@ -477,25 +471,34 @@ function ReactTable({
   );
 
   useEffect(() => {
-    const selectedTripRowsData = [];
-    const selectedOtherRowsData = [];
-    const selectedAllRowsData = [];
-
+    const SelectedchangeStatusRow = [];
+    const SelectedGenerateInvoiceRow = [];
+    const SelectedDeleteTripRow = [];
     if (selectedFlatRows.length > 0) {
       selectedFlatRows.forEach((row) => {
-        if (row.original.assignedStatus === 2) {
-          selectedTripRowsData.push(row.original); // Add to trip data
-        } else {
-          selectedOtherRowsData.push(row.original._id); // Add to other data
+        const { assignedStatus, invoiceId } = row.original;
+
+        // Only for generating invoice when status is 2 and invoice doesn't exist
+        if (assignedStatus === 2 && !invoiceId) {
+          SelectedGenerateInvoiceRow.push(row.original);
         }
-        if (!row.original.invoiceId) selectedAllRowsData.push(row.original._id);
+
+        // Eligible for deletion when status is 1 or 3
+        if (assignedStatus === 1 || assignedStatus === 3) {
+          SelectedDeleteTripRow.push(row.original);
+        }
+
+        // Eligible for changing status when status is 1, 2, or 3
+        if ( !invoiceId) {
+          SelectedchangeStatusRow.push(row.original);
+        }
       });
     }
 
-    handleSelectedData(selectedAllRowsData);
-    handleTripSelectedData(selectedTripRowsData); // Pass filtered trip rows data
-    handleOtherSelectedData(selectedOtherRowsData); // Pass filtered other rows data
-  }, [selectedFlatRows, handleTripSelectedData, handleOtherSelectedData]);
+    handleGenerateInvoiceData(SelectedGenerateInvoiceRow);
+    handleChangeTripStatusData(SelectedchangeStatusRow);
+    handleDeleteTripData(SelectedDeleteTripRow);
+  }, [selectedFlatRows, handleGenerateInvoiceData, handleChangeTripStatusData, handleDeleteTripData]);
 
   const componentRef = useRef(null);
 
@@ -504,20 +507,35 @@ function ReactTable({
   const groups = ['All', TRIP_STATUS.COMPLETED, TRIP_STATUS.PENDING, TRIP_STATUS.CANCELLED];
   // const groups = ['All', 'Pending', 'Completed', 'Cancelled'];
 
-  const countGroup = data.map((item) => item.assignedStatus);
   const counts = {
-    Pending: countGroup.filter((status) => status === TRIP_STATUS.PENDING).length,
-    Completed: countGroup.filter((status) => status === TRIP_STATUS.COMPLETED).length,
-    Cancelled: countGroup.filter((status) => status === TRIP_STATUS.CANCELLED).length,
-    Unattended: countGroup.filter((status) => status === TRIP_STATUS.UNATTENDED).length
+    Pending: data.filter((item) => item.assignedStatus === TRIP_STATUS.PENDING).length,
+    Completed: data.filter((item) => item.invoiceId === null && item.assignedStatus === TRIP_STATUS.COMPLETED).length,
+    Cancelled: data.filter((item) => item.assignedStatus === TRIP_STATUS.CANCELLED || item.assignedStatus === 4).length
   };
 
   const [activeTab, setActiveTab] = useState(groups[0]);
 
+  const filterData = useMemo(() => {
+    return rows.filter((row, index) => {
+      // console.log('row i = ', row);
+      // console.log('index = ', index);
+      const { assignedStatus, invoiceId } = row.original;
+
+      if (activeTab === 'All') {
+        return true; // Show all rows
+      } else if (activeTab === TRIP_STATUS.CANCELLED) {
+        return assignedStatus === TRIP_STATUS.CANCELLED && !invoiceId;
+      } else if (activeTab === TRIP_STATUS.COMPLETED) {
+        return assignedStatus === TRIP_STATUS.COMPLETED && !invoiceId;
+      } else if (activeTab === TRIP_STATUS.PENDING) {
+        return assignedStatus === TRIP_STATUS.PENDING && !invoiceId;
+      }
+    });
+  }, [rows, activeTab]);
+
   useEffect(() => {
-    setFilter('status', activeTab === 'All' ? '' : activeTab === TRIP_STATUS.PENDING ? 1 : activeTab === TRIP_STATUS.COMPLETED ? 2 : 3);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+    setFilter('status', activeTab === 'All' ? '' : activeTab === TRIP_STATUS.INVOICE ? TRIP_STATUS.COMPLETED : activeTab);
+  }, [activeTab, setFilter]);
 
   return (
     <>
@@ -538,7 +556,9 @@ function ReactTable({
                         ? counts.Completed
                         : status === TRIP_STATUS.PENDING
                         ? counts.Pending
-                        : counts.Cancelled
+                        : status === TRIP_STATUS.CANCELLED
+                        ? counts.Cancelled
+                        : counts.Invoice
                     }
                     color={
                       status === 'All'
@@ -547,7 +567,9 @@ function ReactTable({
                         ? 'success'
                         : status === TRIP_STATUS.PENDING
                         ? 'warning'
-                        : 'error'
+                        : status === TRIP_STATUS.CANCELLED
+                        ? 'error'
+                        : 'info'
                     }
                     variant="light"
                     size="small"
@@ -559,9 +581,24 @@ function ReactTable({
           </Tabs>
 
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-            <GenerateInvoiceButton selected={tripSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-            <ChangeStatusButton selected={selectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
-            <DeleteButton selected={otherSelectedData} visible={deleteButton} deleteURL={deleteURL} handleRefetch={handleRefetch} />
+            <GenerateInvoiceButton
+              selected={generateInvoiceData}
+              visible={generateInvoiceData && generateInvoiceData.length > 0}
+              deleteURL={deleteURL}
+              handleRefetch={handleRefetch}
+            />
+            <ChangeStatusButton
+              selected={changeTripStatusData}
+              visible={changeTripStatusData && changeTripStatusData.length > 0}
+              deleteURL={deleteURL}
+              handleRefetch={handleRefetch}
+            />
+            <DeleteButton
+              selected={deleteTripData}
+              visible={deleteTripData && deleteTripData.length > 0}
+              deleteURL={deleteURL}
+              handleRefetch={handleRefetch}
+            />
             <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
               <Button variant="contained" size="small" color="secondary" startIcon={<Add />} onClick={handleOpen}>
                 Add Trip
@@ -572,8 +609,8 @@ function ReactTable({
       </Box>
       {/* <TableRowSelection selected={Object.keys(selectedRowIds).length} /> */}
       <Box ref={componentRef}>
-        <Box sx={{ p: 1 }}>
-          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        <Box sx={{ p: 2 }}>
+          <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
         <ScrollX>
           <Table {...getTableProps()}>
@@ -589,7 +626,7 @@ function ReactTable({
               ))}
             </TableHead>
             <TableBody {...getTableBodyProps()}>
-              {page.map((row, i) => {
+              {filterData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).map((row, i) => {
                 prepareRow(row);
                 return (
                   <Fragment key={i}>
@@ -613,8 +650,8 @@ function ReactTable({
           </Table>
         </ScrollX>
 
-        <Box sx={{ p: 1 }}>
-          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        <Box sx={{ p: 2 }}>
+          <TablePagination gotoPage={gotoPage} rows={filterData} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
         </Box>
       </Box>
     </>
@@ -798,12 +835,9 @@ const TripList = () => {
   const [loading, setLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [tripSelectedData, setTripSelectedData] = useState(null);
-  const [otherSelectedData, setOtherSelectedData] = useState(null);
-  const [selectedData, setSelectedData] = useState(null);
+
   const [popup, setPopup] = useState('');
   const [updatedStatus, setUpdatedStatus] = useState(-1);
-  const { alertPopup } = useSelector((state) => state.invoice);
   const [cancelText, setCancelText] = useState('');
   const [data, setData] = useState(null);
   const [refetch, setRefetch] = useState(false);
@@ -811,6 +845,20 @@ const TripList = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState(null);
+
+  const [generateInvoiceData, setGenerateInvoiceData] = useState(null);
+  const [changeTripStatusData, setChangeTripStatusData] = useState(null);
+  const [deleteTripData, setDeleteTripData] = useState(null);
+
+  const handleGenerateInvoiceData = useCallback((selectedRows) => {
+    setGenerateInvoiceData(selectedRows);
+  }, []);
+  const handleChangeTripStatusData = useCallback((selectedRows) => {
+    setChangeTripStatusData(selectedRows);
+  }, []);
+  const handleDeleteTripData = useCallback((selectedRows) => {
+    setDeleteTripData(selectedRows);
+  }, []);
 
   const userType = useSelector((state) => state.auth.userType);
 
@@ -874,7 +922,7 @@ const TripList = () => {
     }
   ];
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const navigate = useNavigate();
 
@@ -938,48 +986,6 @@ const TripList = () => {
     fetchData();
   }, [refetch, startDate, endDate, filterOptions]);
 
-  useEffect(() => {
-    if (selectedRow && !alertOpen && updatedStatus !== -1) {
-      // TODO : Change Api status
-      const changeStatus = async () => {
-        try {
-          await changeStatusFromAPI(selectedRow._id, updatedStatus, cancelText);
-
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Trips Status changed successfully',
-              variant: 'alert',
-              alert: {
-                color: 'success'
-              },
-              close: true
-            })
-          );
-          setRefetch((prev) => !prev);
-          setUpdatedStatus(-1);
-          setSelectedRow(null);
-          setPopup('');
-        } catch (error) {
-          console.log('Error while changing status = ', error);
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: error?.message || 'Something went wrong',
-              variant: 'alert',
-              alert: {
-                color: 'error'
-              },
-              close: true
-            })
-          );
-        }
-      };
-
-      changeStatus();
-    }
-  }, [selectedRow, alertOpen, updatedStatus, cancelText]);
-
   const columns = useMemo(
     () => [
       {
@@ -1010,6 +1016,27 @@ const TripList = () => {
         Cell: ({ row }) => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="flex-start" spacing={1}>
+              <Tooltip
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                      opacity: 0.9
+                    }
+                  }
+                }}
+                title="View Trip"
+              >
+                <IconButton
+                  color="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent row expansion
+                    handleCompanyClick(row.original);
+                  }}
+                >
+                  <Eye />
+                </IconButton>
+              </Tooltip>
               {row.original.assignedStatus !== TRIP_STATUS.COMPLETED && (
                 <AccessControlWrapper allowedUserTypes={[USERTYPE.iscabProvider]}>
                   <Tooltip
@@ -1036,27 +1063,6 @@ const TripList = () => {
                   </Tooltip>
                 </AccessControlWrapper>
               )}
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
-                    }
-                  }
-                }}
-                title="View Trip"
-              >
-                <IconButton
-                  color="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent row expansion
-                    handleCompanyClick(row.original);
-                  }}
-                >
-                  <Eye />
-                </IconButton>
-              </Tooltip>
             </Stack>
           );
         }
@@ -1073,7 +1079,24 @@ const TripList = () => {
               return <Chip label="Pending" color="warning" variant="light" />;
             }
             case TRIP_STATUS.COMPLETED: {
-              return row.original.invoiceId && row.original.invoiceId !== null ? (
+              // Determine which ID to check based on userType
+              const { invoiceId, vendorInvoiceId } = row.original;
+
+              // const showInvoiceChip =
+              //   ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType) && invoiceId && invoiceId !== null) ||
+              //   ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType) && vendorInvoiceId && vendorInvoiceId !== null);
+
+              let showInvoiceChip = false;
+
+              if ([USERTYPE.iscabProvider, USERTYPE.iscabProviderUser].includes(userType)) {
+                console.log('invoiceId ............');
+                showInvoiceChip = invoiceId && invoiceId !== null;
+              } else if ([USERTYPE.isVendor, USERTYPE.isVendorUser].includes(userType)) {
+                console.log('vendorInvoiceId ............');
+                showInvoiceChip = vendorInvoiceId && vendorInvoiceId !== null;
+              }
+
+              return showInvoiceChip ? (
                 <Chip
                   label="Invoice ✓"
                   color="info"
@@ -1110,16 +1133,9 @@ const TripList = () => {
         Header: 'Company Name',
         accessor: 'companyID.company_name',
         disableFilters: true,
-        Cell: ({ row, value }) => {
+        Cell: ({ row }) => {
           return (
             <Typography>
-              {/* <Link
-                to={`/apps/trips/trip-view/${row.original.tripId}?id=${row.original._id}`}
-                onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
-                style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
-              >
-                {row.original.companyID.company_name}
-              </Link> */}
               <Link
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent row expansion
@@ -1127,7 +1143,7 @@ const TripList = () => {
                 }}
                 style={{ textDecoration: 'none', color: 'rgb(70,128,255)' }}
               >
-                {row.original.companyID.company_name}
+                {row.original.companyID.company_name || 'N/A'}
               </Link>
             </Typography>
           );
@@ -1138,47 +1154,44 @@ const TripList = () => {
         accessor: 'tripDate',
         disableFilters: true,
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Trip Time',
-        accessor: 'tripTime'
+        accessor: 'tripTime',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Id',
-        accessor: 'rosterTripId'
+        accessor: 'rosterTripId',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Name',
-        accessor: 'zoneNameID.zoneName'
+        accessor: 'zoneNameID.zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type',
-        accessor: 'zoneTypeID.zoneTypeName'
+        accessor: 'zoneTypeID.zoneTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab',
-        accessor: 'vehicleNumber.vehicleNumber'
+        accessor: 'vehicleNumber.vehicleNumber',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Type',
-        accessor: 'vehicleTypeID.vehicleTypeName'
+        accessor: 'vehicleTypeID.vehicleTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Driver',
         accessor: 'driverId.userName',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
-      // {
-      //   Header: 'Vehicle Guard Price',
-      //   accessor: 'guardPrice', // This can be any key; we won't directly use it.
-      //   Cell: ({ row }) => {
-      //     const { driverGuardPrice, vendorGuardPrice } = row.original;
-      //     return driverGuardPrice || vendorGuardPrice || 'Null';
-      //   }
-      // },
-
       ...(userType === USERTYPE.iscabProvider
         ? [
             {
@@ -1202,7 +1215,7 @@ const TripList = () => {
         accessor: (row) => row.vendorRate ?? row.driverRate,
         Cell: ({ row }) => {
           const { vendorRate, driverRate } = row.original;
-          return vendorRate ?? driverRate ?? 'Null';
+          return vendorRate ?? driverRate ?? 'N/A';
         }
       },
       {
@@ -1232,13 +1245,14 @@ const TripList = () => {
 
       {
         Header: 'Additional Rate',
-        accessor: 'addOnRate'
+        accessor: 'addOnRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
 
       {
         Header: 'Location',
         accessor: 'location',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Type',
@@ -1247,15 +1261,17 @@ const TripList = () => {
           switch (value) {
             case 1: // For Pick Up
               return <Chip label="Pick Up" color="warning" variant="light" />;
-            case 2: // For Pick Drop
+            case 2: // For Drop
               return <Chip label="Drop" color="success" variant="light" />;
+            default: // Default case for other values or undefined
+              return <Chip label="N/A" color="info" variant="light" />;
           }
         }
       },
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       }
     ],
     [userType]
@@ -1267,18 +1283,6 @@ const TripList = () => {
   }, []);
 
   const handleModalOpen = useCallback(() => setIsOpen(true), []);
-
-  // if (loading) return <Loader />;
-
-  const handleTripSelectedData = useCallback((selectedRows) => {
-    setTripSelectedData(selectedRows);
-  }, []);
-  const handleOtherSelectedData = useCallback((selectedRows) => {
-    setOtherSelectedData(selectedRows);
-  }, []);
-  const handleSelectedData = useCallback((selectedRows) => {
-    setSelectedData(selectedRows);
-  }, []);
 
   return (
     <>
@@ -1486,12 +1490,12 @@ const TripList = () => {
               handleRefetch={handleRefetch}
               handleClose={handleCloseModal}
               handleOpen={handleModalOpen}
-              tripSelectedData={tripSelectedData}
-              handleTripSelectedData={handleTripSelectedData}
-              otherSelectedData={otherSelectedData}
-              handleOtherSelectedData={handleOtherSelectedData}
-              selectedData={selectedData}
-              handleSelectedData={handleSelectedData}
+              generateInvoiceData={generateInvoiceData}
+              changeTripStatusData={changeTripStatusData}
+              deleteTripData={deleteTripData}
+              handleDeleteTripData={handleDeleteTripData}
+              handleChangeTripStatusData={handleChangeTripStatusData}
+              handleGenerateInvoiceData={handleGenerateInvoiceData}
             />
           ) : (
             <EmptyTableDemo />

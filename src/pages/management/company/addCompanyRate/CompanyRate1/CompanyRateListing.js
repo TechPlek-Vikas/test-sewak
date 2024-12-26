@@ -10,10 +10,10 @@ import CompanyRate from './CompanyRate';
 // import SearchComponent from 'pages/apps/test/CompanySearch';
 import axiosServices from 'utils/axios';
 import SearchComponent from 'pages/apps/roster/components/CompanySearch';
+import { dispatch } from 'store';
+import { fetchCompanyRates } from 'store/cacheSlice/companyRatesSlice';
 
 // ==============================|| REACT TABLE - EDITABLE CELL ||============================== //
-
-const token = localStorage.getItem('serviceToken');
 
 const AddCompanyRateDialog = ({ open, onClose, setSelectedCompany }) => {
   const [selectedCompany, setSelectedCompanyLocal] = useState(null);
@@ -69,30 +69,26 @@ const CompanyRateListing = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [updateKey, setUpdateKey] = useState(0);
-  const [loading, setLoading] = useState('true');
+
   const [showCompanyList, setShowCompanyList] = useState(false); // State to manage which component to show
   const [selectedCompany, setSelectedCompany] = useState(null); // Selected company state
   const [dialogOpen, setDialogOpen] = useState(true); // Dialog state
 
+  const { cache, loading, error } = useSelector((state) => state.companyRates); // Access Redux state
+
+  // Fetch company rates based on selectedCompany
   useEffect(() => {
-    const fetchdata = async () => {
-      if (!selectedCompany?._id) return; // Don't call API until company ID is fetched
+    if (selectedCompany?._id && !cache[selectedCompany._id]) {
+      dispatch(fetchCompanyRates(selectedCompany._id));
+    }
+  }, [dispatch, selectedCompany?._id, cache]);
 
-      setLoading(true); // Start loading
-      try {
-        const response = await axiosServices.get(`/company/unwind/rates?companyId=${selectedCompany._id}` );
-        setCompanyList(response.data.data);
-      } catch (error) {
-        console.error('Error fetching data', error);
-      } finally {
-        setLoading(false); // Stop loading regardless of success or error
-      }
-    };
-
-    fetchdata();
-  }, [selectedCompany?._id, token]);
-
-  console.log('companyList', companyList);
+  // Update local state when cache changes
+  useEffect(() => {
+    if (selectedCompany?._id && cache[selectedCompany._id]) {
+      setCompanyList(cache[selectedCompany._id]);
+    }
+  }, [cache, selectedCompany?._id]);
 
   const handleAddRate = () => {
     setShowCompanyList(true);
@@ -108,7 +104,7 @@ const CompanyRateListing = () => {
   useEffect(() => {}, [companyRate]);
 
   const handleBackToList = () => {
-    setShowCompanyList(false); 
+    setShowCompanyList(false);
   };
 
   return (
@@ -135,7 +131,7 @@ const CompanyRateListing = () => {
           {/* )} */}
         </Stack>
       ) : (
-        <CompanyRate id={selectedCompany?._id} companyName={selectedCompany?.company_name} onBackToList={handleBackToList}/>
+        <CompanyRate id={selectedCompany?._id} companyName={selectedCompany?.company_name} onBackToList={handleBackToList} />
       )}
     </>
   );

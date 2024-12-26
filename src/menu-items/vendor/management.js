@@ -2,16 +2,16 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Buliding, Car, MenuBoard, Profile, User } from 'iconsax-react';
-import { MODULE, PERMISSIONS } from 'constant';
+import { Buliding, Car, MenuBoard, Profile, Profile2User, User } from 'iconsax-react';
 
 // icons
 const icons = {
   samplePage: MenuBoard,
-  user:User,
-  company:Buliding,
-  driver:Profile,
-  cab:Car,
+  user: User,
+  company: Buliding,
+  vendor: Profile2User,
+  driver: Profile,
+  cab: Car
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -53,7 +53,7 @@ const management = {
       title: <FormattedMessage id="company" />,
       type: 'item',
       url: '/management/company/view',
-      icon: icons.company,
+      icon: icons.company
       // children: [
       //   {
       //     id: 'view',
@@ -65,13 +65,22 @@ const management = {
       // ]
     },
 
+    // Vendor
+    {
+      id: 'vendor',
+      title: <FormattedMessage id="vendor" />,
+      type: 'item',
+      url: '/management/vendor/view',
+      icon: icons.vendor
+    },
+
     // Driver
     {
       id: 'driver',
       title: <FormattedMessage id="driver" />,
       type: 'item',
       url: '/management/driver/view',
-      icon: icons.driver,
+      icon: icons.driver
       // children: [
       //   {
       //     id: 'view',
@@ -89,7 +98,7 @@ const management = {
       title: <FormattedMessage id="cab" />,
       type: 'item',
       url: '/management/cab/view',
-      icon: icons.cab,
+      icon: icons.cab
       // children: [
       //   {
       //     id: 'view',

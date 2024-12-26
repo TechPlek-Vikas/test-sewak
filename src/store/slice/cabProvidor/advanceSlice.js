@@ -1,38 +1,46 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching advance
-export const fetchAdvances = createAsyncThunk('advances/fetchAdvances', async ({page,limit,startDate,endDate,filterbyUid}, { rejectWithValue }) => {
-  try {
-    // Advance Requests to CabProvider
-    // const response = await axios.get(`/advance/requested/cab/provider?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}&filterbyUid=${filterbyUid}`);
-    const response = await axios.get(`/advance/requested/cab/provider`, {
-      params: {
-        page: page,
-        limit: limit,
-        startDate: startDate,
-        endDate: endDate,
-        filterbyUid: filterbyUid
-      }
-    });
-    
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response ? error.response.data : error.message);
+export const fetchAdvances = createAsyncThunk(
+  'advances/fetchAdvances',
+  async ({ page, limit, startDate, endDate, filterbyUid }, { rejectWithValue }) => {
+    try {
+      // Advance Requests to CabProvider
+      // const response = await axios.get(`/advance/requested/cab/provider?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}&filterbyUid=${filterbyUid}`);
+      const response = await axios.get(`/advance/requested/cab/provider`, {
+        params: {
+          page: page,
+          limit: limit,
+          startDate: startDate,
+          endDate: endDate,
+          filterbyUid: filterbyUid
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
   }
-});
+);
 
 // Define the async thunk for fetching advance list for vendor and driver
-export const fetchAdvanceList = createAsyncThunk('advances/fetchAdvanceList', async ({page,limit,startDate,endDate}, { rejectWithValue }) => {
-  try {
-    // Advance Requests to CabProvider
-    const response = await axios.get(`/advance/my/list?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
-    
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response ? error.response.data : error.message);
+export const fetchAdvanceList = createAsyncThunk(
+  'advances/fetchAdvanceList',
+  async ({ page, limit, startDate, endDate }, { rejectWithValue }) => {
+    try {
+      // Advance Requests to CabProvider
+      const response = await axios.get(`/advance/my/list?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
   }
-});
+);
 
 // Initial state for the zone names
 const initialState = {
@@ -65,7 +73,6 @@ const advanceSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAdvances.fulfilled, (state, action) => {
-        
         state.advances = action.payload.data; // Handle empty result
         state.metaData = {
           totalCount: action.payload.totalCount || 0,
@@ -84,8 +91,8 @@ const advanceSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAdvanceList.fulfilled, (state, action) => {
-        console.log("action.payload",action.payload);
-        
+        console.log('action.payload', action.payload);
+
         state.advancesList = action.payload.data; // Handle empty result
         state.metaData = {
           totalCount: action.payload.totalCount || 0,
@@ -98,7 +105,8 @@ const advanceSlice = createSlice({
       .addCase(fetchAdvanceList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

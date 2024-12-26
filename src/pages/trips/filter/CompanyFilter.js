@@ -5,7 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import axiosServices from 'utils/axios';
 import { SearchNormal1 } from 'iconsax-react';
 
-const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
+const CompanyFilter = ({ setFilterOptions, sx, value, setQuery: setquery }) => {
   const [options, setOptions] = useState([]); // Stores fetched options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
@@ -23,7 +23,6 @@ const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
       setLoading(true);
       try {
         const response = await axiosServices.get(`/company?page=1&name=${query}&limit=10`);
-        console.log("response.data",response.data.data.result)
         const companies = response.data.data.result;
 
         setOptions(companies);
@@ -94,7 +93,7 @@ const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
         onChange={(event, newValue) => {
           setFilterOptions((prevState) => ({
             ...prevState,
-            selectedCompany: newValue || {} // Reset to empty object if no selection
+            selectedCompany: newValue || null // Reset to empty object if no selection
           }));
         }}
         renderInput={(params) => (
@@ -103,9 +102,7 @@ const CompanyFilter = ({ setFilterOptions, sx, value,setQuery:setquery }) => {
             placeholder="Filter Company"
             InputProps={{
               ...params.InputProps,
-              startAdornment: (
-                  <SearchNormal1 size={14} />
-              ),
+              startAdornment: <SearchNormal1 size={14} />,
               endAdornment: (
                 <>
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}

@@ -20,13 +20,16 @@ import PaginationBox from 'components/tables/Pagination';
 import PropTypes from 'prop-types';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import axiosServices from 'utils/axios';
 import { Add, Eye, Trash } from 'iconsax-react';
 import { useDrawer } from 'contexts/DrawerContext';
 import RosterTemplateDialog from './dialog/RosterTemplateDialog';
 import { useTheme } from '@mui/material/styles';
 import { ThemeMode } from 'config';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, handleFileUploadOpen, fileData: fileInfo, openTemplate }) => {
   const navigate = useNavigate();
@@ -62,27 +65,27 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, han
           Header: 'Company Name',
           accessor: 'companyId',
           Cell: ({ row }) => {
-            return <Typography>{row.original.companyId?.company_name}</Typography>;
+            return <Typography>{row.original.companyId?.company_name || 'N/A'}</Typography>;
           }
         },
         {
           Header: 'Start Date',
-          accessor: (row) => (row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : '')
+          accessor: (row) => (row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : 'N/A')
         },
         {
           Header: 'End Date',
-          accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : '')
+          accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : 'N/A')
         },
         {
           Header: 'Added By',
           accessor: 'addedBy',
           Cell: ({ row }) => {
-            return <Typography>{row.original.addedBy?.userName}</Typography>;
+            return <Typography>{row.original.addedBy?.userName || 'N/A'}</Typography>;
           }
         },
         {
           Header: 'Upload Date',
-          accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : '')
+          accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : 'N/A')
         },
         {
           Header: 'sTATUS',
@@ -223,27 +226,32 @@ const RosterFileTable = ({ data, page, setPage, limit, setLimit, lastPageNo, han
         <>
           <Stack direction={'row'} spacing={1} justifyContent="flex-end" alignItems="center" sx={{ p: 0, pb: 3 }}>
             <Stack direction="row" alignItems="center" spacing={2}>
-              <Button
-                variant="contained"
-                startIcon={<Add />} // Show loading spinner if loading
-                onClick={handleFileUploadOpen}
-                size="small"
-                // color="info"
-                color="inherit"
-              >
-                {/* {loading ? 'Loading...' : 'Add Branch'} */}
-                {'Upload File'}
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Add />} // Show loading spinner if loading
-                onClick={() => openDrawer()}
-                size="small"
-                color="success"
-              >
-                {/* {loading ? 'Loading...' : 'Add Branch'} */}
-                {'Create Template'}
-              </Button>
+              <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />} // Show loading spinner if loading
+                  onClick={handleFileUploadOpen}
+                  size="small"
+                  // color="info"
+                  color="inherit"
+                >
+                  {/* {loading ? 'Loading...' : 'Add Branch'} */}
+                  {'Upload File'}
+                </Button>
+              </WrapperButton>
+
+              <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />} // Show loading spinner if loading
+                  onClick={() => openDrawer()}
+                  size="small"
+                  color="success"
+                >
+                  {/* {loading ? 'Loading...' : 'Add Branch'} */}
+                  {'Create Template'}
+                </Button>
+              </WrapperButton>
             </Stack>
           </Stack>
           <MainCard content={false}>
@@ -285,17 +293,29 @@ function ReactTable({ columns: userColumns, data }) {
       columns: userColumns,
       data
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>

@@ -10,3 +10,9 @@ div:hover .logo-overlay {
 .MuiInputLabel-root .MuiFormLabel-asterisk, .MuiFormLabel-asterisk {
   color: red; /* Apply red color to the required asterisk */
 }
+
+.hide-arrows {
+  appearance: none; /* General browsers */
+  -webkit-appearance: none; /* Chrome, Safari */
+  -moz-appearance: textfield; /* Firefox */
+}

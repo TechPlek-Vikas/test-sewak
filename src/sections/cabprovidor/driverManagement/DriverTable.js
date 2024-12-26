@@ -44,6 +44,7 @@ import {
 import AlertDelete from 'components/alertDialog/AlertDelete';
 import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { Base64 } from 'js-base64';
+import WrapperButton from 'components/common/guards/WrapperButton';
 
 const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading, setUpdateKey, updateKey }) => {
   const theme = useTheme();
@@ -68,7 +69,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
 
   const handleOpenPendingDialog = (id) => {
     setAssignedVehicle(id.assignedVehicle);
-    console.log(id);
+    // console.log(id);
     setDriverId(id);
     setPendingDialogOpen(true);
   };
@@ -85,12 +86,12 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
   };
 
   const handleCloseDialog = useCallback(async (e, flag = false) => {
-    console.log(`🚀 ~ handleCloseDialog ~ flag:`, flag, selectedID);
+    // console.log(`🚀 ~ handleCloseDialog ~ flag:`, flag, selectedID);
 
     if (typeof flag === 'boolean' && flag) {
       const response = await dispatch(deleteDriver()).unwrap();
 
-      console.log('res = ', response);
+      // console.log('res = ', response);
 
       if (response.status === 200) {
         dispatch(
@@ -162,14 +163,14 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
           Cell: ({ row, value }) => {
             const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
             const isCabProviderDriver = row.original.isCabProviderDriver;
-            console.log('isCabProviderDriver', isCabProviderDriver);
+            // console.log('isCabProviderDriver', isCabProviderDriver);
             // const queryParams = generateLinkState(isCabProviderDriver, userType);
 
             // const encodedParams = Base64.encode(JSON.stringify({ cabProvider: isCabProviderDriver > 0 }));
             // console.log(`🚀 ~ DriverTable ~ encodedParams:`, encodedParams);
             // const queryParams = userType === USERTYPE.iscabProvider ? `?cabProvider=${isCabProviderDriver > 0}&data=${encodedParams}` : ''; // Conditional query params
             const queryParams = userType === USERTYPE.iscabProvider ? `?cabProvider=${isCabProviderDriver > 0}` : ''; // Conditional query params
-            console.log(`🚀 ~ DriverTable ~ queryParams:`, queryParams);
+            // console.log(`🚀 ~ DriverTable ~ queryParams:`, queryParams);
 
             return (
               <Typography>
@@ -179,7 +180,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                   onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                   style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
-                  {formattedValue}
+                  {formattedValue  || 'N/A'}
                   {isCabProviderDriver > 0 && (
                     <Tooltip title="Cabprovider" arrow>
                       <span style={{ color: 'green', fontSize: '0.9rem', cursor: 'pointer' }}>✔</span>
@@ -193,12 +194,19 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         {
           Header: 'Email',
           accessor: 'userEmail',
-          disableSortBy: true
+          Cell: ({ value }) => value || 'N/A'
+          // disableSortBy: true
         },
         {
           Header: 'Contact Number',
           accessor: 'contactNumber',
-          disableSortBy: true
+          Cell: ({ value }) => value || 'N/A'
+          // disableSortBy: true
+        },
+        {
+          Header: 'Office Charge',
+          accessor: 'officeChargeAmount',
+          Cell: ({ value }) => value || 'N/A'
         },
         {
           Header: 'Vehicles',
@@ -247,7 +255,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
         {
           Header: 'Created At',
           accessor: 'createdAt',
-          disableSortBy: true,
+          // disableSortBy: true,
           Cell: ({ row }) => {
             const { values } = row;
             const time = values['createdAt'];
@@ -262,7 +270,7 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                 }}
               >
                 {' '}
-                {time ? formattedDate(time, 'DD/MM/YYYY') : ''}
+                {time ? formattedDate(time, 'DD/MM/YYYY') : 'N/A'}
               </Typography>
             );
           }
@@ -365,7 +373,33 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
             const isCabProviderDriver = row.original.isCabProviderDriver;
             return (
               <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-                {isCabProviderDriver === 1 && (
+                {isCabProviderDriver === USERTYPE.iscabProvider && (
+                  <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.READ}>
+                    <Tooltip
+                      componentsProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                            opacity: 0.9
+                          }
+                        }
+                      }}
+                      title="View Rate"
+                    >
+                      <IconButton
+                        color="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
+                        }}
+                      >
+                        <Eye />
+                      </IconButton>
+                    </Tooltip>
+                  </WrapperButton>
+                )}
+
+                <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.UPDATE}>
                   <Tooltip
                     componentsProps={{
                       tooltip: {
@@ -375,68 +409,48 @@ const DriverTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading
                         }
                       }
                     }}
-                    title="View Rate"
+                    title="Edit"
                   >
                     <IconButton
-                      color="secondary"
+                      color="primary"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/management/driver/view-driver-rate?driverID=${driverID}`);
+                        // console.log('Id = ', row.values._id);
+                        dispatch(setSelectedID(row.values._id));
+                        navigate(`/management/driver/edit/${row.values._id}`);
                       }}
                     >
-                      <Eye />
+                      <Edit />
                     </IconButton>
                   </Tooltip>
-                )}
+                </WrapperButton>
 
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
+                <WrapperButton moduleName={MODULE.DRIVER} permission={PERMISSIONS.DELETE}>
+                  <Tooltip
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                          opacity: 0.9
+                        }
                       }
-                    }
-                  }}
-                  title="Edit"
-                >
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log('Id = ', row.values._id);
-                      dispatch(setSelectedID(row.values._id));
-                      navigate(`/management/driver/edit/${row.values._id}`);
                     }}
+                    title="Delete"
                   >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                        opacity: 0.9
-                      }
-                    }
-                  }}
-                  title="Delete"
-                >
-                  <IconButton
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log(`🚀 ~ row.values.id:`, row.values);
-                      dispatch(handleOpen(ACTION.DELETE));
-                      dispatch(setDeletedName(row.values['userName']));
-                      dispatch(setSelectedID(row.values._id)); //setDeletedName
-                    }}
-                  >
-                    <Trash />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // console.log(`🚀 ~ row.values.id:`, row.values);
+                        dispatch(handleOpen(ACTION.DELETE));
+                        dispatch(setDeletedName(row.values['userName']));
+                        dispatch(setSelectedID(row.values._id)); //setDeletedName
+                      }}
+                    >
+                      <Trash />
+                    </IconButton>
+                  </Tooltip>
+                </WrapperButton>
               </Stack>
             );
           }

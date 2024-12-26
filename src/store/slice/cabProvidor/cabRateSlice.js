@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const API_URL = {
   ALL: '',
@@ -45,7 +47,9 @@ const cabRateSlice = createSlice({
       state.error = null;
     }
   },
-  extraReducers: (builder) => {}
+  extraReducers: (builder) => {
+    builder.addCase(logoutActivity, handleReset(initialState));
+  }
 });
 
 export const { reset, resetError } = cabRateSlice.actions;

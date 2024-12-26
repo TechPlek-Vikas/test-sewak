@@ -16,10 +16,12 @@ import { MenuOrientation, ThemeMode } from 'config';
 // ==============================|| NAVIGATION - ITEM ||============================== //
 
 const NavItem = ({ item, level }) => {
+  // console.log('NavItem = ', item);
   const theme = useTheme();
   const downLG = useMediaQuery(theme.breakpoints.down('lg'));
 
   const { drawerOpen, openItem } = useSelector((state) => state.menu);
+  // console.log(`🚀 ~ NavItem ~ openItem:`, openItem);
   const { menuOrientation } = useConfig();
 
   let itemTarget = '_self';
@@ -28,6 +30,7 @@ const NavItem = ({ item, level }) => {
   }
 
   const isSelected = openItem.findIndex((id) => id === item.id) > -1;
+  // console.log(`🚀 ~ NavItem ~ isSelected:`, isSelected);
 
   const Icon = item.icon;
   const itemIcon = item.icon ? <Icon variant="Bulk" size={drawerOpen ? 20 : 22} /> : false;

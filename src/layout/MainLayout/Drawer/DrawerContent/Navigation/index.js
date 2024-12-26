@@ -31,9 +31,9 @@ const Navigation = () => {
   const [menuItems, setMenuItems] = useState({ items: [] });
 
   useLayoutEffect(() => {
-    console.log('userType', userType);
+    // console.log('userType', userType);
     const menuItem = getMenuItems(userType);
-    console.log(`🚀 ~ useLayoutEffect ~ menuItem:`, menuItem);
+    // console.log(`🚀 ~ useLayoutEffect ~ menuItem:`, menuItem);
     setMenuItems(menuItem);
     // eslint-disable-next-line
   }, []);

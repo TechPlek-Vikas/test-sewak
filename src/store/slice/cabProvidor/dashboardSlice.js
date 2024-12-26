@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   data: null, // Empty array initially
@@ -47,7 +49,8 @@ const dashboardSlice = createSlice({
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

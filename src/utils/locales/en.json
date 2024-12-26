@@ -63,5 +63,10 @@
   "company1": "Company",
   "vendor1": "Vendor",
   "driver1": "Driver",
-  "trip": "Trip"
+  "trip": "Trip",
+  "vendor reports": "Vendor Reports",
+  "subscription": "Subscription",
+  "expense management": "Expense Management",
+  "driver reports": "Driver Reports",
+  "transaction": "Transactions"
 }

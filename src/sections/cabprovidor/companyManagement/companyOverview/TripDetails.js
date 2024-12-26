@@ -53,7 +53,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
   const userType = useSelector((state) => state.auth.userType);
   console.log(`🚀 ~ TripDetail ~ userType:`, userType);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const TRIP_STATUS = {
     PENDING: 1,
@@ -123,57 +123,65 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
       {
         Header: 'Trip Date',
         accessor: 'tripDate',
-        Cell: ({ value }) => formattedDate(value, 'DD/MM/YYYY')
+        Cell: ({ value }) => formattedDate(value || 'N/A', 'DD/MM/YYYY')
       },
       {
         Header: 'Trip Time',
-        accessor: 'tripTime'
+        accessor: 'tripTime',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Name',
-        accessor: 'zoneNameID.zoneName'
+        accessor: 'zoneNameID.zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Type',
-        accessor: 'zoneTypeID.zoneTypeName'
+        accessor: 'zoneTypeID.zoneTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab',
-        accessor: 'vehicleNumber.vehicleNumber'
+        accessor: 'vehicleNumber.vehicleNumber',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Type',
-        accessor: 'vehicleTypeID.vehicleTypeName'
-      },
-      {
-        Header: GUARD_PRICE_LABEL[userType] || 'Vehicle Guard Price',
-        accessor: 'guardPrice', // This can be any key; we won't directly use it.
-        Cell: ({ row }) => {
-          const { driverGuardPrice, vendorGuardPrice } = row.original;
-          return driverGuardPrice || vendorGuardPrice || 'Null';
-        }
+        accessor: 'vehicleTypeID.vehicleTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: RATE_LABEL[userType] || 'Vehicle Rates',
         accessor: (row) => row.vendorRate ?? row.driverRate,
         Cell: ({ row }) => {
           const { vendorRate, driverRate } = row.original;
-          return vendorRate ?? driverRate ?? 'Null';
+          return vendorRate ?? driverRate ?? 'N/A';
         }
       },
       {
-        Header: 'Additional Rate',
-        accessor: 'addOnRate'
+        Header: GUARD_PRICE_LABEL[userType] || 'Vehicle Guard Price',
+        accessor: 'guardPrice', // This can be any key; we won't directly use it.
+        Cell: ({ row }) => {
+          const { driverGuardPrice, vendorGuardPrice } = row.original;
+          return driverGuardPrice || vendorGuardPrice || 'N/A';
+        }
       },
+
       {
         Header: PENALTY_LABEL[userType] || 'Penalty',
         accessor: 'penalty',
-        Cell: ({ value }) => value || 'Null'
+        Cell: ({ value }) => value || 'N/A'
       },
+      {
+        Header: 'Additional Rate',
+        accessor: 'addOnRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
+      },
+
       {
         Header: 'Location',
         accessor: 'location',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Trip Type',
@@ -190,7 +198,7 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => value || 'None'
+        Cell: ({ value }) => value || 'N/A'
       }
     ],
     [userType]
@@ -216,7 +224,9 @@ const TripDetail = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) =
             {loading ? (
               <TableSkeleton rows={10} columns={8} />
             ) : data?.length > 0 ? (
-              <ReactTable columns={columns} data={data} loading={loading} />
+              <>
+                <ReactTable columns={columns} data={data} loading={loading} />
+              </>
             ) : (
               <EmptyTableDemo />
             )}
@@ -266,6 +276,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
+    useSortBy,
     useExpanded, // Retain for row expansion
     usePagination, // Retain for pagination functionality
     useRowSelect // Retain if row selection is needed
@@ -276,12 +287,23 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
       <Stack>
         <ScrollX>
           <Table {...getTableProps()}>
-            <TableHead>
+            {/* <TableHead>
               {headerGroups.map((headerGroup) => (
                 <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
                   {headerGroup.headers.map((column) => (
                     <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
                       {column.render('Header')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHead> */}
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                      <HeaderSort column={column} sort />
                     </TableCell>
                   ))}
                 </TableRow>

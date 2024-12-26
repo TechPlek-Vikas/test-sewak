@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { USERTYPE } from 'constant';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   companyReportData: null,
@@ -16,22 +18,43 @@ const initialState = {
   error: null
 };
 
-export const fetchCompanyWiseReports = createAsyncThunk('reports/fetchCompanyWiseReports', async (payload, { rejectWithValue }) => {
-  try {
-    console.log('payload', payload);
-    // await new Promise((resolve) => setTimeout(resolve, 4000));
-    const response = await axios.post(`/reports/company/wise/summary`, {
-      data: {
-        startDate: payload?.data?.startDate,
-        endDate: payload?.data?.endDate,
-        companyIDs: payload?.data?.companyId || []
-      }
-    });
-    return response.data.data;
-  } catch (error) {
-    return rejectWithValue(error.response ? error.response.data : error.message);
+const API_URL = {
+  [USERTYPE.iscabProvider]: {
+    COMPANY_WISE_REPORTS: '/reports/company/wise/summary',
+    CAB_WISE_REPORTS: '/reports/cab/wise/summary',
+    ADVANCE_REPORTS: '/reports/advance/summary'
+  },
+  [USERTYPE.isVendor]: {
+    COMPANY_WISE_REPORTS: '/reports/company/wise/summary/vendor',
+    CAB_WISE_REPORTS: '/reports/cab/wise/summary/vendor',
+    ADVANCE_REPORTS: '/reports/advance/summary/vendor'
   }
-});
+};
+
+export const fetchCompanyWiseReports = createAsyncThunk(
+  'reports/fetchCompanyWiseReports',
+  async (payload, { rejectWithValue, getState }) => {
+    try {
+      console.log('payload', payload);
+      const state = getState();
+      const userType = state.auth.userType;
+      // console.log('userType', userType);
+      // await new Promise((resolve) => setTimeout(resolve, 4000));
+      const response = await axios.post(`/reports/company/wise/summary`, {
+        data: {
+          startDate: payload?.data?.startDate,
+          endDate: payload?.data?.endDate,
+          companyIDs: payload?.data?.companyId || [],
+          vendorIds: payload?.data?.vendorIds || [],
+          driverIds: payload?.data?.driverIds || []
+        }
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
 
 export const fetchCabWiseReports = createAsyncThunk('reports/fetchCabWiseReports', async (payload, { rejectWithValue }) => {
   try {
@@ -103,7 +126,8 @@ const reportSlice = createSlice({
       .addCase(fetchAdvanceReports.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

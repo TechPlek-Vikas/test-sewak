@@ -8,14 +8,29 @@ import { ButtonBase } from '@mui/material';
 import Logo from './LogoMain';
 import LogoIcon from './LogoIcon';
 import { APP_DEFAULT_PATH } from 'config';
+import { dispatch } from 'store';
+import { activeItem } from 'store/reducers/menu';
 
 // ==============================|| MAIN LOGO ||============================== //
 
-const LogoSection = ({ reverse, isIcon, sx, to }) => (
-  <ButtonBase disableRipple component={Link} to={!to ? APP_DEFAULT_PATH : to} sx={sx}>
-    {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />}
-  </ButtonBase>
-);
+
+const LogoSection = ({ reverse, isIcon, sx, to }) => {
+  // console.log(`🚀 ~ LogoSection ~ to:`, to);
+  return (
+    <ButtonBase
+      disableRipple
+      component={Link}
+      to={!to ? APP_DEFAULT_PATH : to}
+      sx={sx}
+      onClick={() => {
+        // console.log('Additional task executed!');
+        dispatch(activeItem({ openItem: ['home'] }));
+      }}
+    >
+      {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />}
+    </ButtonBase>
+  );
+};
 
 LogoSection.propTypes = {
   reverse: PropTypes.bool,

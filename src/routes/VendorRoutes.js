@@ -24,6 +24,8 @@ const UnderConstruction = Loadable(lazy(() => import('components/maintenance/Und
 
 const PageNotFound = Loadable(lazy(() => import('pages/maintenance/error/404')));
 
+// Home
+const Home = Loadable(lazy(() => import('pages/Home')));
 // Dashboard
 const Dashboard = Loadable(lazy(() => import('pages')));
 // Roster
@@ -34,7 +36,8 @@ const Dashboard = Loadable(lazy(() => import('pages')));
 
 // Invoice
 const InvoiceList = Loadable(lazy(() => import('pages/invoice/list/List')));
-const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
+// const InvoiceCreate = Loadable(lazy(() => import('pages/invoice/create/Create2')));
+const InvoiceCreate = Loadable(lazy(() => import('pages/apps/invoice/Create')));
 const InvoiceDetails = Loadable(lazy(() => import('pages/invoice/details/Details')));
 const InvoiceCreate3 = Loadable(lazy(() => import('pages/invoice/create/Create3')));
 
@@ -42,7 +45,7 @@ const InvoiceCreate3 = Loadable(lazy(() => import('pages/invoice/create/Create3'
 const User = Loadable(lazy(() => import('pages/management/user')));
 const AddUser = Loadable(lazy(() => import('pages/management/user/AddUser')));
 // Vendor
-const Vendor = Loadable(lazy(() => import('pages/management/vendor')));
+const Vendor = Loadable(lazy(() => import('sections/vendor/management/vendor')));
 const AddVendor = Loadable(lazy(() => import('pages/management/vendor/AddVendor')));
 const VendorOverview = Loadable(lazy(() => import('pages/overview/VendorOverview')));
 
@@ -51,7 +54,6 @@ const Driver = Loadable(lazy(() => import('pages/management/driver')));
 const DriverOverview = Loadable(lazy(() => import('pages/overview/DriverOverview')));
 // const AddDriver = Loadable(lazy(() => import('pages/management/driver/AddDriver')));
 const EditDriver = Loadable(lazy(() => import('pages/management/driver/EditDriver')));
-
 
 // Cab
 const Cab = Loadable(lazy(() => import('pages/management/cab')));
@@ -89,6 +91,11 @@ const TripView = Loadable(lazy(() => import('pages/trips/TripView')));
 // Settings
 const InvoiceSettings = Loadable(lazy(() => import('pages/setting/invoice')));
 
+// reports
+const CompanyWiseReportForVendor = Loadable(lazy(() => import('pages/reports/Company/Vendor')));
+const CabReportsForVendor = Loadable(lazy(() => import('pages/reports/Cab/Vendor')));
+const AdvanceReportsForVendor = Loadable(lazy(() => import('pages/reports/Advance/Vendor')));
+
 // ==============================|| MAIN ROUTES ||============================== //
 
 const VendorRoutes = {
@@ -102,6 +109,12 @@ const VendorRoutes = {
         </AuthGuard>
       ),
       children: [
+        // Home
+        {
+          path: 'home',
+          // element: <UnderConstruction title="Home" />
+          element: <Home />
+        },
         // Dashboard
         {
           path: 'dashboard',
@@ -153,7 +166,7 @@ const VendorRoutes = {
                   path: 'advance',
                   element: <AdvancesVendorTable />
                   //   element: <ProtectedRoute element={Advance} moduleName={MODULE.ADVANCE} permission={PERMISSIONS.READ} />
-                },
+                }
                 // {
                 //   path: 'advance-type',
                 //   element: <AdvanceVendorType />
@@ -223,6 +236,16 @@ const VendorRoutes = {
                 }
               ]
             },
+            //  Vendor
+             {
+              path: 'vendor',
+              children: [
+                {
+                  path: 'view',
+                  element: <Vendor />
+                },
+              ]
+            },
             // Driver
             {
               path: 'driver',
@@ -286,7 +309,22 @@ const VendorRoutes = {
         // Reports
         {
           path: 'reports',
-          element: <Reports />
+          // element: <Reports />,
+          children: [
+            // Vendor
+            {
+              path: 'vendor/company-report',
+              element: <CompanyWiseReportForVendor />
+            },
+            {
+              path: 'vendor/advance-report',
+              element: <AdvanceReportsForVendor />
+            },
+            {
+              path: 'vendor/cab-report',
+              element: <CabReportsForVendor />
+            }
+          ]
         },
 
         // Master
@@ -304,8 +342,6 @@ const VendorRoutes = {
         {
           path: 'settings',
           children: [
-
-
             // Invoice Settings
             {
               path: 'invoice',

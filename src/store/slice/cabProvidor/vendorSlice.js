@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
 import { commonInitialState, commonReducers } from '../common';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching vendors
 export const fetchVendors = createAsyncThunk('vendors/fetchVendors', async ({ page = 1, limit = 10, query }, { rejectWithValue }) => {
@@ -22,6 +24,21 @@ export const fetchVendors = createAsyncThunk('vendors/fetchVendors', async ({ pa
 export const fetchAllVendors = createAsyncThunk('vendors/fetchAllVendors', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get('/vendor/names');
+    return response.data.data; // Ensure the API response is in this format
+  } catch (error) {
+    return rejectWithValue(error.response ? error.response.data : error.message);
+  }
+});
+
+// fetch all vendors without pagination for vendor
+export const fetchVendor1 = createAsyncThunk('vendors/fetchVendor1', async (_, { rejectWithValue, getState }) => {
+  try {
+    const { vendors } = getState();
+    if (Array.isArray(vendors.cache['AssociatedCabProviders']) && vendors.cache['AssociatedCabProviders'].length > 0) {
+      return vendors.cache['AssociatedCabProviders'];
+    }
+
+    const response = await axios.get('/vendor/cab/providers/details');
     return response.data.data; // Ensure the API response is in this format
   } catch (error) {
     return rejectWithValue(error.response ? error.response.data : error.message);
@@ -113,8 +130,10 @@ export const updateVendorStatus = createAsyncThunk('vendors/updateVendorStatus',
 
 const initialState = {
   ...commonInitialState,
+  cache: {},
   vendors: [],
   allVendors: [],
+  vendor1: [],
   metaData: {
     totalCount: 0,
     page: 1,
@@ -167,6 +186,20 @@ const vendorSlice = createSlice({
         state.loading = false;
         state.error = action.payload || action.error.message;
       })
+      .addCase(fetchVendor1.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchVendor1.fulfilled, (state, action) => {
+        console.log(`🚀 ~ .addCase ~ action:`, action);
+        state.vendor1 = action.payload || [];
+        state.cache['AssociatedCabProviders'] = action.payload || [];
+        state.loading = false;
+      })
+      .addCase(fetchVendor1.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
       .addCase(addVendor.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -205,7 +238,8 @@ const vendorSlice = createSlice({
       .addCase(deleteVendor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

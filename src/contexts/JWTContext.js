@@ -11,33 +11,13 @@ import { INITIALIZE, LOGIN, LOGOUT } from 'store/reducers/actions';
 
 // project-imports
 import axios from 'utils/axios';
+import axios1 from 'axios';
+
 import { useDispatch, useSelector } from 'react-redux';
-import Loader from 'components/Loader';
-import { MODULE, PERMISSIONS } from 'constant';
-import { openSnackbar } from 'store/reducers/snackbar';
+import { MODULE, PERMISSIONS, USERTYPE } from 'constant';
 import CustomCircularLoader from 'components/CustomCircularLoader';
-
-// const x = {
-//   company: ['CREATE', 'edit'],
-//   vendor: ['CREATE', 'Read'],
-//   // vendor: ['Read'],
-//   driver: ['add', 'read'],
-//   invoice: ['add'],
-//   reports: ['add'],
-//   user: [''],
-//   roster: ['READ'],
-//   // role: ['READ', 'CREATE'],
-//   // role: ['READ'],
-//   // role: ['READ', 'UPDATE'],
-//   role: ['READ', 'DELETE'],
-//   // role: ['READ', 'CREATE', 'UPDATE'],
-//   zone: ['CREATE', 'UPDATE', 'DELETE', 'READ'],
-//   'cab-rate': ['read']
-// };
-
-// eslint-disable-next-line no-unused-vars
-
-/** */
+import { dispatch as reducerDispatch } from 'store';
+import { logoutActivity } from 'store/slice/cabProvidor/accountSettingSlice';
 
 const x = {
   [MODULE.ROSTER]: [PERMISSIONS.CREATE],
@@ -103,26 +83,90 @@ export const JWTProvider = ({ children }) => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
 
+  // useEffect(() => {
+  //   // this function will check the session validation and will redirect to home/ login page
+  //   const init = async () => {
+  //     try {
+  //       const serviceToken = localStorage.getItem('serviceToken');
+  //       if (serviceToken && verifyToken(serviceToken)) {
+  //         setSession(serviceToken);
+  //         const response = await axios.get('/user/view');
+  //         // eslint-disable-next-line no-unused-vars
+  //         // console.log(response.data);
+  //         // if
+  //         const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
+  //           headers: {
+  //             Authorization: `${serviceToken}` // Authorization header with token
+  //           }
+  //         });
+  //         console.log('accountSettingResponse', accountSettingResponse);
+
+  //         // console.log("accountSettingResponse",accountSettingResponse);
+  //         const accountSetting = accountSettingResponse?.data?.data;
+  //         console.log('accountSetting', accountSetting);
+
+  //         const { userData, userSpecificData, userPermissions } = response.data;
+  //         // console.log(userData, userSpecificData, userPermissions)
+  //         dispatch({
+  //           type: LOGIN,
+  //           payload: {
+  //             user: userData,
+  //             userType: userData.userType,
+  //             userSpecificData: userSpecificData,
+  //             userPermissions: userPermissions,
+  //             accountSetting: accountSetting
+  //           }
+  //         });
+  //       } else {
+  //         dispatch({
+  //           type: LOGOUT
+  //         });
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       dispatch({
+  //         type: LOGOUT
+  //       });
+  //     } finally {
+  //       dispatch({
+  //         type: INITIALIZE
+  //       });
+  //     }
+  //   };
+
+  //   init();
+  // }, [dispatch]); // Added `dispatch` dependency
+
   useEffect(() => {
-    // this function will check the session validation and will redirect to home/ login page
     const init = async () => {
       try {
         const serviceToken = localStorage.getItem('serviceToken');
         if (serviceToken && verifyToken(serviceToken)) {
           setSession(serviceToken);
           const response = await axios.get('/user/view');
-          // eslint-disable-next-line no-unused-vars
-          console.log(response.data);
-          const { userData, userSpecificData } = response.data;
-          // console.log(userData, userSpecificData, userPermissions)
+
+          const { userData, userSpecificData, userPermissions } = response.data;
+
+          // Skip account settings for superAdmin
+          let accountSetting = null;
+          if (userData.userType !== USERTYPE.superAdmin) {
+            const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
+              headers: {
+                Authorization: `${serviceToken}`
+              }
+            });
+            console.log('accountSettingResponse', accountSettingResponse);
+            accountSetting = accountSettingResponse?.data?.data;
+          }
+
           dispatch({
             type: LOGIN,
             payload: {
               user: userData,
               userType: userData.userType,
               userSpecificData: userSpecificData,
-              // userPermissions: userPermissions
-              userPermissions: x
+              userPermissions: userPermissions,
+              accountSetting: accountSetting
             }
           });
         } else {
@@ -143,18 +187,72 @@ export const JWTProvider = ({ children }) => {
     };
 
     init();
-  }, [dispatch]); // Added `dispatch` dependency
+  }, [dispatch]);
 
-  const login = async (email, password) => {
+  // const login = async (email, password) => {
+  //   const payload = {
+  //     data: {
+  //       userEmail: email,
+  //       userPassword: password
+  //     }
+  //   };
+
+  //   const response = await axios.post('/user/login', payload);
+  //   const { userData, userSpecificData, userPermissions } = response.data;
+
+  //   // const accountSettingResponse = await axios.get('/accountSetting/');
+
+  //   const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
+  //     headers: {
+  //       Authorization: `${userData.token}` // Authorization header with token
+  //     }
+  //   });
+  //   // c
+  //   // console.log("accountSettingResponse",accountSettingResponse);
+  //   const accountSetting = accountSettingResponse?.data?.data;
+  //   console.log('accountSetting', accountSetting);
+
+  //   const userInfo = {
+  //     // userId: userData.userType === USERTYPE.iscabProviderUser ? userSpecificData.cabProviderId : userData._id,
+  //     userId: userData._id,
+  //     userType: userData.userType
+  //   };
+
+  //   localStorage.setItem('userInformation', JSON.stringify(userInfo));
+
+  //   setSession(userData.token);
+  //   dispatch({
+  //     type: LOGIN,
+  //     payload: {
+  //       user: userData,
+  //       userType: userData.userType,
+  //       userSpecificData: userSpecificData,
+  //       // userPermissions: x
+  //       userPermissions: userPermissions,
+  //       accountSetting: accountSetting
+  //     }
+  //   });
+  // };
+
+  const login = async (receivedPayload) => {
     const payload = {
-      data: {
-        userEmail: email,
-        userPassword: password
-      }
+      data: receivedPayload
     };
 
     const response = await axios.post('/user/login', payload);
     const { userData, userSpecificData, userPermissions } = response.data;
+
+    // Skip account settings for superAdmin
+    let accountSetting = null;
+    if (userData.userType !== USERTYPE.superAdmin) {
+      const accountSettingResponse = await axios1.get(`${process.env.REACT_APP_API_URL}accountSetting`, {
+        headers: {
+          Authorization: `${userData.token}`
+        }
+      });
+      console.log('accountSettingResponse', accountSettingResponse);
+      accountSetting = accountSettingResponse?.data?.data;
+    }
 
     const userInfo = {
       userId: userData._id,
@@ -170,8 +268,8 @@ export const JWTProvider = ({ children }) => {
         user: userData,
         userType: userData.userType,
         userSpecificData: userSpecificData,
-        // userPermissions: x
-        userPermissions: userPermissions
+        userPermissions: userPermissions,
+        accountSetting: accountSetting
       }
     });
   };
@@ -179,11 +277,12 @@ export const JWTProvider = ({ children }) => {
   const register = async (formData) => {
     try {
       // Recode this flow to ensure user verification logic
-      await axios.post('/user/register', formData, {
+      const response = await axios.post('/user/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
+      return response;
     } catch (error) {
       console.log('Error registering user:', error);
       throw error;
@@ -194,6 +293,7 @@ export const JWTProvider = ({ children }) => {
   const logout = () => {
     setSession(null);
     dispatch({ type: LOGOUT });
+    reducerDispatch(logoutActivity());
   };
 
   const OTPSend = async (email) => {

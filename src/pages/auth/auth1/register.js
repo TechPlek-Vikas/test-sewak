@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { Grid, Stack, Typography } from '@mui/material';
 
 // project-imports
-import Logo from 'components/logo';
+// import Logo from 'components/logo';
+import Logo from 'components/logo/logoOrganisation/index';
 import useAuth from 'hooks/useAuth';
 import AuthWrapper from 'sections/auth/AuthWrapper';
 import FirebaseRegister from 'sections/auth/auth-forms/AuthRegister';
@@ -13,7 +14,7 @@ import FirebaseRegister from 'sections/auth/auth-forms/AuthRegister';
 
 // ================================|| REGISTER ||================================ //
 
-const Register = () => {
+const Register = ({handleNext}) => {
   const { isLoggedIn } = useAuth();
 
   return (
@@ -27,7 +28,7 @@ const Register = () => {
             <Typography variant="h3">Sign up</Typography>
             <Typography
               component={Link}
-              to={isLoggedIn ? '/dashboard' : '/auth'}
+              to={isLoggedIn ? '/home' : '/auth'}
               variant="body1"
               sx={{ textDecoration: 'none' }}
               color="primary"
@@ -37,7 +38,7 @@ const Register = () => {
           </Stack>
         </Grid>
         <Grid item xs={12}>
-          <FirebaseRegister />
+          <FirebaseRegister handleNext={handleNext}/>
         </Grid>
       </Grid>
     </AuthWrapper>

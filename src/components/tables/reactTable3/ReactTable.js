@@ -90,8 +90,9 @@ function ReactTable({ columns, data }) {
             </TableBody>
           </Table>
         </ScrollX>
-
-        <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        <TableCell sx={{ pb: 2 }} colSpan={12}>
+          <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
+        </TableCell>
       </Stack>
     </>
   );

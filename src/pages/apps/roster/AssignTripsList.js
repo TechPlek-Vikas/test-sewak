@@ -45,6 +45,8 @@ import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import axiosServices from 'utils/axios';
 import AssignTripsDialog from './components/dialog/AssignTripsDialog';
 import TableSkeleton from 'components/tables/TableSkeleton';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -157,13 +159,15 @@ function ReactTable({ columns, data, selectedData, handleSetSelectedData, handle
         <GlobalFilter preGlobalFilteredRows={preGlobalFilteredRows} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         {/* Button Section */}
         {selectedData.length > 0 && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAssignDialogOpen} // Replace this with your actual onClick function
-          >
-            Assign Trips ({selectedData.filter((data) => data.status !== 3).length})
-          </Button>
+          <WrapperButton moduleName={MODULE.ROSTER} permission={PERMISSIONS.CREATE}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAssignDialogOpen} // Replace this with your actual onClick function
+            >
+              Assign Trips ({selectedData.filter((data) => data.status !== 3).length})
+            </Button>
+          </WrapperButton>
         )}
       </Stack>
       <Box ref={componentRef}>
@@ -238,7 +242,7 @@ const AssignTripList = () => {
   const { rosterData: stateData, fileData } = location.state || {};
   const [selectedData, setSelectedData] = useState([]);
   const [initateRender, setInitateRender] = useState(0);
- 
+
   const handleSetSelectedData = useCallback((selectedRows) => {
     setSelectedData(selectedRows);
   }, []);

@@ -1,11 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { logoutActivity } from 'store/slice/cabProvidor/accountSettingSlice';
 
 // project-imports
 import axios from 'utils/axios';
+import { handleReset } from 'utils/helper';
 
 // initial state
 const initialState = {
-  openItem: ['dashboard'],
+  openItem: ['home'],
   openComponent: 'buttons',
   selectedID: null,
   drawerOpen: false,
@@ -51,9 +53,11 @@ const menu = createSlice({
   },
 
   extraReducers(builder) {
-    builder.addCase(fetchMenu.fulfilled, (state, action) => {
-      state.menu = action.payload.dashboard;
-    });
+    builder
+      .addCase(fetchMenu.fulfilled, (state, action) => {
+        state.menu = action.payload.dashboard;
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

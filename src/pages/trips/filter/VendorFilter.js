@@ -95,9 +95,7 @@ const VendorFilter = ({ setFilterOptions, sx, value }) => {
             placeholder="Filter Vendor"
             InputProps={{
               ...params.InputProps,
-              startAdornment: (
-                <SearchNormal1 size={14} />
-            ),
+              startAdornment: <SearchNormal1 size={14} />,
               endAdornment: (
                 <>
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}
@@ -106,6 +104,15 @@ const VendorFilter = ({ setFilterOptions, sx, value }) => {
               )
             }}
           />
+        )}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            <div>
+              {option.vendorCompanyName || 'N/A'}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.workMobileNumber ? `+91-${option.workMobileNumber}` : 'N/A'}</span>
+            </div>
+          </li>
         )}
       />
     </Grid>

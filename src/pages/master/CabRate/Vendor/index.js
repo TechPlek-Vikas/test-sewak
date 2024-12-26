@@ -4,6 +4,7 @@ import {
   Button,
   CardHeader,
   Chip,
+  CircularProgress,
   Grid,
   IconButton,
   InputLabel,
@@ -33,6 +34,7 @@ import moment from 'moment';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+import TemplateSelectDialog from 'sections/rateUpload/vendorRate/TemplateSelectDialog';
 import { openSnackbar } from 'store/reducers/snackbar';
 import { createRateMasterForVendor } from 'store/slice/cabProvidor/cabRateSlice';
 // import { fetchAllStateTaxes } from 'store/reducers/stateTax';
@@ -359,8 +361,34 @@ const AddCabRateVendor = () => {
     setFieldValue(name, value);
   };
 
+  const [openCompanyRateUploadDialog, setOpenCompanyRateUploadDialog] = useState(false);
+
+  const handleCompanyRateUploadOpen = () => {
+    setOpenCompanyRateUploadDialog(true);
+  };
+  const handleCompanyRateUploadClose = () => {
+    setOpenCompanyRateUploadDialog(false);
+  };
   return (
     <>
+      <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-end'} sx={{mb:2}}>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<Add />}
+          onClick={handleCompanyRateUploadOpen}
+          size="small"
+          // disabled={loading}
+        >
+          {' Upload'}
+        </Button>
+      </Stack>
+      <TemplateSelectDialog
+        open={openCompanyRateUploadDialog}
+        handleOpen={handleCompanyRateUploadOpen}
+        handleClose={handleCompanyRateUploadClose}
+        // setKey={setKey}
+      />
       <FormikProvider value={formik}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Form autoComplete="off" onSubmit={handleSubmit}>

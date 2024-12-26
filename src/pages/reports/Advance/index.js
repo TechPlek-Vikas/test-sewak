@@ -14,6 +14,8 @@ import TableSkeleton from 'components/tables/TableSkeleton';
 import { downloadAdvanceReport, downloadReport } from '../utils/DownloadAdvanceReport';
 import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
 import DriverSelection from 'SearchComponents/DriverSelectionAutocomplete';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const AdvanceReports = () => {
   const [selectedDriver, setSelectedDriver] = useState([]);
@@ -21,7 +23,7 @@ const AdvanceReports = () => {
 
   const { loading, advanceReportData } = useSelector((state) => state.report);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const payload = {
@@ -61,9 +63,8 @@ const AdvanceReports = () => {
       <Stack gap={1}>
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
-          {/* vehicle Filter */}
-
           <Stack direction={'row'} gap={2} alignItems={'center'}>
+            {/* Driver Filter */}
             <Box sx={{ minWidth: '300px' }}>
               <DriverSelection
                 value={selectedDriver}
@@ -71,6 +72,8 @@ const AdvanceReports = () => {
                 sx={{ minWidth: '300px', maxWidth: '600px' }}
               />
             </Box>
+
+            {/* Vendor Filter */}
             <Box sx={{ minWidth: '300px' }}>
               <VendorSelection
                 value={selectedVendor}
@@ -93,16 +96,20 @@ const AdvanceReports = () => {
               onRangeChange={handleRangeChange}
               showSelectedRangeLabel
             />
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-            >
-              Download Report
-            </Button>
+
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

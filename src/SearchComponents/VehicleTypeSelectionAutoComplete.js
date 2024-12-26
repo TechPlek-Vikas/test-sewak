@@ -1,66 +1,103 @@
-import React, { useEffect, useState } from 'react';
-import { Autocomplete, Checkbox, Grid } from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Autocomplete, Checkbox, Grid, List, ListItem, Skeleton, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import axiosServices from 'utils/axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { debounce } from 'lodash';
+import { dispatch } from 'store';
+import { fetchVehicleTypes } from 'store/cacheSlice/vehicleTypes';
 
-const VehicleTypeSelection = ({ sx, value, setSelectedOptions }) => {
-  const [options, setOptions] = useState([]); // Stores fetched options
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [open, setOpen] = useState(false); // Tracks dropdown open state
-  const [query, setQuery] = useState(''); // Tracks input query
-  const [cache, setCache] = useState({}); // Cache for query results
+const VehicleTypeSelection = ({ sx, value = [], setSelectedOptions }) => {
+  const { initialized, cache, loading } = useSelector((state) => state.vehicleType); // Access Redux state
 
-  // Fetch default options when dropdown is opened
+  const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options
+  const [query, setQuery] = useState(''); // Tracks search input
+  const [selectAllChecked, setSelectAllChecked] = useState(false); // Tracks Select All state
+
   useEffect(() => {
-    const fetchDefaultOptions = async () => {
-      if (cache.default) {
-        setOptions(cache.default);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const response = await axiosServices.get('/vehicleType');
-        const vendors = response.data.data;
-        setOptions(vendors);
-        setCache((prevCache) => ({ ...prevCache, default: vendors })); // Cache default results
-      } catch (error) {
-        console.error('Error fetching default options:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (open) {
-      fetchDefaultOptions();
+    if (!initialized) {
+      dispatch(fetchVehicleTypes()); // Only fetch if not initialized
+    } else if (cache.default.length > 0) {
+      setFilteredOptions(cache.default); // Use cached data
     }
-  }, [open, cache.default]);
+  }, [initialized, cache, dispatch]);
 
-  // Log selected options for debugging
+  // "Select All" Logic
+  const handleSelectAllToggle = () => {
+    if (selectAllChecked) {
+      setSelectedOptions([]); // Clear all selections
+    } else {
+      setSelectedOptions(filteredOptions); // Select all filtered options
+    }
+    setSelectAllChecked(!selectAllChecked);
+  };
+
+  // Update "Select All" checkbox dynamically
   useEffect(() => {
-    console.log('Selected Options:', value);
-  }, [value]);
+    setSelectAllChecked(value.length === filteredOptions.length && filteredOptions.length > 0);
+  }, [value, filteredOptions]);
+
+  // Debounced Search for Filtering
+  const filterOptions = useCallback(
+    debounce((inputQuery) => {
+      const lowerQuery = inputQuery.toLowerCase();
+      const filtered = cache.default.filter((option) => option.vehicleTypeName.toLowerCase().includes(lowerQuery));
+      setFilteredOptions(filtered);
+    }, 500),
+    [cache.default]
+  );
+
+  useEffect(() => {
+    if (query) {
+      filterOptions(query); // Filter options based on search input
+    } else {
+      setFilteredOptions(cache.default); // Reset filtered options when query is cleared
+    }
+  }, [query, filterOptions, cache.default]);
+  if (!initialized) {
+    return <>Loading component</>;
+  }
+
   return (
     <Grid item xs={12}>
       <Autocomplete
         multiple
-        id="checkboxes-tags-demo"
-        options={options}
+        id="vehicle-type-selection"
+        options={filteredOptions} // Use filtered options
         disableCloseOnSelect
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
         getOptionLabel={(option) => option.vehicleTypeName}
-        onChange={(event, newValue) => {
-          setSelectedOptions(newValue || []); // Set the selected options
-        }}
+        value={value}
+        onChange={(event, newValue) => setSelectedOptions(newValue || [])} // Update selected options
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
             {option.vehicleTypeName}
           </li>
         )}
-        renderInput={(params) => <TextField {...params} placeholder="Select VehicleType" />}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Search or Select Vehicle Types"
+            onChange={(e) => setQuery(e.target.value)} // Update search query
+          />
+        )}
+        ListboxComponent={(listboxProps) => {
+          const { children, ...rest } = listboxProps;
+          return (
+            <List {...rest}>
+              {/* "Select All" Option */}
+              <ListItem button onClick={handleSelectAllToggle} style={{ display: 'flex', alignItems: 'center' }}>
+                <Checkbox
+                  checked={selectAllChecked}
+                  indeterminate={value.length > 0 && value.length < filteredOptions.length}
+                  style={{ marginRight: 8 }}
+                />
+                <Typography>Select All</Typography>
+              </ListItem>
+              {/* Render Filtered Options */}
+              {children}
+            </List>
+          );
+        }}
         sx={{
           '& .MuiOutlinedInput-root': { p: 1 },
           '& .MuiAutocomplete-tag': {

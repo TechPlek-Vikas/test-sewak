@@ -105,16 +105,16 @@ const ProfileOverview = () => {
               allowScrollButtonsMobile
             >
               <Tab label="Overview" icon={<Book />} iconPosition="start" />
-              <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" />
+              {/* <Tab label="Transaction" icon={<WalletMoney />} iconPosition="start" />
               <Tab label="Mails" icon={<TableDocument />} iconPosition="start" />
-              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" />
+              <Tab label="Statement" icon={<DocumentText />} iconPosition="start" /> */}
             </Tabs>
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && <Overview profileBasicData={profileBasicData} profileSpecificData={profileSpecificData}/>}
-              {activeTab === 1 && <Transaction data={data} />}
+              {/* {activeTab === 1 && <Transaction data={data} />}
               {activeTab === 2 && <Mails/>}
-              {activeTab === 3 && <Statement/>}
+              {activeTab === 3 && <Statement/>} */}
             </Box>
           </Box>
           <Box sx={{ mt: 2.5 }}>

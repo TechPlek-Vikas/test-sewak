@@ -1,31 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { Autocomplete, Checkbox, Grid } from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Autocomplete, Checkbox, Grid, List, ListItem, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import axiosServices from 'utils/axios';
+import { debounce } from 'lodash';
 
-const DriverSelection = ({ sx, value, setSelectedOptions }) => {
-  const [options, setOptions] = useState([]); // Stores fetched options
+const DriverSelection = ({ sx, value = [], setSelectedOptions }) => {
+  const [options, setOptions] = useState([]); // Stores all fetched options
+  const [filteredOptions, setFilteredOptions] = useState([]); // Filtered options
   const [loading, setLoading] = useState(false); // Tracks loading state
   const [open, setOpen] = useState(false); // Tracks dropdown open state
-  const [query, setQuery] = useState(''); // Tracks input query
-  const [cache, setCache] = useState({}); // Cache for query results
+  const [query, setQuery] = useState(''); // Tracks search input
+  const [cache, setCache] = useState({}); // Cache for fetched results
+  const [selectAllChecked, setSelectAllChecked] = useState(false); // Tracks Select All state
 
   // Fetch default options when dropdown is opened
   useEffect(() => {
     const fetchDefaultOptions = async () => {
       if (cache.default) {
         setOptions(cache.default);
+        setFilteredOptions(cache.default);
         return;
       }
 
       setLoading(true);
       try {
-        const response = await axiosServices.get('/driver/list?drivertype=1&page=1&limit=10');
-        console.log('response.data.data', response.data.data);
-        const drivers = response.data.data.result;
-
-        setOptions(drivers);
-        setCache((prevCache) => ({ ...prevCache, default: drivers })); // Cache default results
+        const response = await axiosServices.get('/driver/list?drivertype=1&page=1&limit=50');
+        const drivers = response.data.data.result || [];
+        const driverList = drivers.map((item) => ({
+          _id: item._id,
+          userName: item.userName,
+          contactNumber: item.contactNumber
+        }));
+        setOptions(driverList);
+        setFilteredOptions(driverList); // Initialize filtered options
+        setCache((prevCache) => ({ ...prevCache, default: driverList })); // Cache default results
       } catch (error) {
         console.error('Error fetching default options:', error);
       } finally {
@@ -33,61 +41,86 @@ const DriverSelection = ({ sx, value, setSelectedOptions }) => {
       }
     };
 
-    if (open) {
-      fetchDefaultOptions();
-    }
+    if (open) fetchDefaultOptions();
   }, [open, cache.default]);
 
-  // Fetch options based on query with caching
-  useEffect(() => {
-    if (!query) return;
-
-    if (cache[query]) {
-      setOptions(cache[query]); // Use cached results if available
-      return;
+  // "Select All" Logic
+  const handleSelectAllToggle = () => {
+    if (selectAllChecked) {
+      setSelectedOptions([]); // Clear all selections
+    } else {
+      setSelectedOptions(filteredOptions); // Select all filtered options
     }
+    setSelectAllChecked(!selectAllChecked);
+  };
 
-    const fetchOptions = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosServices.get(`/driver/list?drivertype=1&page=1&limit=50&name=${query}`);
-        const drivers = response.data.data.result;
+  // Update "Select All" checkbox dynamically
+  useEffect(() => {
+    setSelectAllChecked(value.length === filteredOptions.length && filteredOptions.length > 0);
+  }, [value, filteredOptions]);
 
-        setOptions(drivers);
-        setCache((prevCache) => ({ ...prevCache, [query]: drivers })); // Cache query results
-      } catch (error) {
-        console.error('Error fetching options:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Debounced Search for Filtering
+  const filterOptions = useCallback(
+    debounce((inputQuery) => {
+      const lowerQuery = inputQuery.toLowerCase();
+      const filtered = options.filter((option) => option.userName.toLowerCase().includes(lowerQuery));
+      setFilteredOptions(filtered);
+    }, 500),
+    [options]
+  );
 
-    const debounceFetch = setTimeout(fetchOptions, 300); // Debounce API call
-    return () => clearTimeout(debounceFetch); // Cleanup debounce timer
-  }, [query, cache]);
+  useEffect(() => {
+    filterOptions(query);
+  }, [query, filterOptions]);
 
   return (
     <Grid item xs={12}>
       <Autocomplete
         multiple
-        id="checkboxes-tags-demo"
-        options={options}
+        id="driver-selection"
+        options={filteredOptions} // Use filtered options
         disableCloseOnSelect
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         getOptionLabel={(option) => option.userName}
-        onInputChange={(event, newInputValue) => setQuery(newInputValue)}
-        onChange={(event, newValue) => {
-          setSelectedOptions(newValue || []); // Set the selected options
-        }}
+        value={value}
+        onChange={(event, newValue) => setSelectedOptions(newValue || [])} // Update selected options
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox style={{ marginRight: 8 }} checked={selected} />
-            {option.userName}
+            <div>
+              {option.userName}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>{option?.contactNumber ? `+91-${option.contactNumber}` : 'N/A'}</span>
+            </div>
           </li>
         )}
-        renderInput={(params) => <TextField {...params} placeholder="Select Drivers" />}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Search or Select Drivers"
+            onChange={(e) => setQuery(e.target.value)} // Update search query
+          />
+        )}
+        ListboxComponent={(listboxProps) => {
+          const { children, ...rest } = listboxProps;
+          return (
+            <List {...rest}>
+              {/* "Select All" Option */}
+              <ListItem button onClick={handleSelectAllToggle} style={{ display: 'flex', alignItems: 'center' }}>
+                <Checkbox
+                  checked={selectAllChecked}
+                  indeterminate={value.length > 0 && value.length < filteredOptions.length}
+                  style={{ marginRight: 8 }}
+                />
+                <Typography>Select All</Typography>
+              </ListItem>
+              {/* Render Filtered Options */}
+              {children}
+            </List>
+          );
+        }}
         sx={{
           '& .MuiOutlinedInput-root': { p: 1 },
           '& .MuiAutocomplete-tag': {

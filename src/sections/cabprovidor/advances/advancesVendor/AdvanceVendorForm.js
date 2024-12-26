@@ -53,7 +53,7 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
     const providerId = localStorage.getItem('providerId');
 
     const fetchdata = async () => {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/advanceType/cab/providerId`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}advanceType/cab/providerId`, {
         headers: {
           Authorization: `${token}`
         }
@@ -75,7 +75,7 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
   useEffect(() => {
     const providerId1 = JSON.parse(localStorage.getItem('providerId'));
     const fetchdata = async () => {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/advanceType/all?cabProviderId=${providerId1}`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}advanceType/all?cabProviderId=${providerId1}`, {
         headers: {
           Authorization: `${token}`
         }
@@ -103,7 +103,7 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
       try {
         if (isCreating) {
           const response = await axios.post(
-            `${process.env.REACT_APP_API_URL}/advance/request`,
+            `${process.env.REACT_APP_API_URL}advance/request`,
             {
               data: {
                 cabProviderId: advanceProvider,
@@ -140,7 +140,7 @@ const AdvanceVendorForm = ({ customer, onCancel, key, setKey }) => {
         } else {
           // PUT request for editing existing record
           const response = await axios.put(
-            `${process.env.REACT_APP_API_URL}/advance/edit`,
+            `${process.env.REACT_APP_API_URL}advance/edit`,
             {
               data: {
                 _id: advanceProvider,

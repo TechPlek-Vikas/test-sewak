@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const initialState = {
   cabs: [], // Empty array initially
@@ -16,22 +18,25 @@ const initialState = {
   errorDetails: null
 };
 
-export const fetchCabs = createAsyncThunk('cabs/fetchCabs', async ({ page = 1, limit = 10, vendorID = null,query }, { rejectWithValue }) => {
-  try {
-    const queryParams = {
-      page,
-      limit,
-      ...(vendorID && { vendorId: vendorID }),
-      vehicleNumber: query
-    };
-    const response = await axios.get(`/vehicle/all`, {
-      params: queryParams
-    });
-    return response.data.data;
-  } catch (error) {
-    return rejectWithValue(error.response ? error.response.data : error.message);
+export const fetchCabs = createAsyncThunk(
+  'cabs/fetchCabs',
+  async ({ page = 1, limit = 10, vendorID = null, query }, { rejectWithValue }) => {
+    try {
+      const queryParams = {
+        page,
+        limit,
+        ...(vendorID && { vendorId: vendorID }),
+        vehicleNumber: query
+      };
+      const response = await axios.get(`/vehicle/all`, {
+        params: queryParams
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
   }
-});
+);
 
 export const addCab = createAsyncThunk('cabs/add', async (formData, { rejectWithValue }) => {
   try {
@@ -137,7 +142,8 @@ const cabSlice = createSlice({
       .addCase(fetchCab1.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

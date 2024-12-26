@@ -1,7 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
+import { filterByKey } from 'store/utils/helper';
 
 const initialState = {
+  cache: {},
   zoneTypes: [], // Empty array initially
   metaData: {
     totalCount: 0,
@@ -12,8 +16,15 @@ const initialState = {
   error: null
 };
 
-export const fetchAllZoneTypes = createAsyncThunk('zoneTypes/fetchAll', async (_, { rejectWithValue }) => {
+export const fetchAllZoneTypes = createAsyncThunk('zoneTypes/fetchAll', async (_, { getState, rejectWithValue }) => {
   try {
+    const { zoneType } = getState();
+    console.log(`🚀 ~ fetchAllZoneTypes ~ zoneType:`, zoneType);
+    console.log('cache' in zoneType);
+
+    if (zoneType.cache['All']) {
+      return zoneType.cache['All'];
+    }
     const response = await axios.get('/zoneType/all');
     return response?.data?.data;
   } catch (error) {
@@ -80,13 +91,70 @@ const zoneTypeSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAllZoneTypes.fulfilled, (state, action) => {
+        console.log(`🚀 ~ .addCase ~ action:`, action);
         state.zoneTypes = action.payload; // Handle empty result
+        state.cache['All'] = action.payload;
         state.loading = false;
       })
       .addCase(fetchAllZoneTypes.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+
+      .addCase(addZoneType.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addZoneType.fulfilled, (state, action) => {
+        console.log(`🚀 ~ .addCase ~ action:`, action);
+        state.zoneTypes.unshift(action.payload.data); // Add the new zone type to the beginning of the array
+        delete state.cache['All'];
+        state.loading = false;
+      })
+      .addCase(addZoneType.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      .addCase(updateZoneType.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateZoneType.fulfilled, (state, action) => {
+        console.log(`🚀 ~ .addCase ~ action:`, action);
+        state.loading = false;
+        state.error = null; // Reset error on success
+
+        const index = state.zoneTypes.findIndex((zoneType) => zoneType._id === action.payload.data._id);
+        if (index !== -1) {
+          state.zoneTypes[index] = action.payload.data;
+          delete state.cache['All'];
+        }
+      })
+      .addCase(updateZoneType.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      .addCase(deleteZoneType.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteZoneType.fulfilled, (state, action) => {
+        console.log(`🚀 ~ .addCase ~ action:`, action);
+        state.loading = false;
+        state.error = null; // Reset error on success
+        const result = filterByKey(state.zoneTypes, '_id', action.payload);
+        console.log(`🚀 ~ .addCase ~ result:`, result);
+        state.zoneTypes = result;
+        state.cache['All'] = result;
+      })
+      .addCase(deleteZoneType.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 
 // third-party
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 
 // project-imports
 import MainCard from 'components/MainCard';
@@ -45,6 +45,7 @@ import DateRangeSelect from 'pages/trips/filter/DateFilter';
 import useDateRange, { TYPE_OPTIONS } from 'hooks/useDateRange';
 import { height, width } from '@mui/system';
 import { formatDateUsingMoment } from 'utils/helper';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 // ==============================|| REACT TABLE ||============================== //
 
@@ -69,17 +70,29 @@ function ReactTable({ columns: userColumns, data, renderRowSubComponent, page, s
         hiddenColumns: ['requestedById._id']
       }
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>
@@ -133,7 +146,7 @@ const ExpandingDetails = () => {
   const [limit, setLimit] = useState(10);
   const lastPageIndex = metaData.lastPageNo;
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const handleAdvanceType = () => {
     navigate('/apps/invoices/advance-type');
@@ -166,6 +179,7 @@ const ExpandingDetails = () => {
         Header: () => null,
         id: 'expander',
         className: 'cell-center',
+        disableSortBy: true,
         Cell: ({ row }) => {
           const collapseIcon = row.isExpanded ? <ArrowDown2 size={14} /> : <ArrowRight2 size={14} />;
           return (
@@ -192,24 +206,28 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Requested By',
-        accessor: 'requestedById.userName'
+        accessor: 'requestedById.userName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Requested Amount',
-        accessor: 'requestedAmount'
+        accessor: 'requestedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Advance Type',
-        accessor: 'advanceTypeId.advanceTypeName'
+        accessor: 'advanceTypeId.advanceTypeName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Interest Rate',
-        accessor: 'advanceTypeId.interestRate'
+        accessor: 'advanceTypeId.interestRate',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Remarks',
         accessor: 'remarks',
-        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'None')
+        Cell: ({ value }) => (value && value.trim() !== '' ? value : 'N/A')
       },
       {
         Header: 'Status',
@@ -228,7 +246,8 @@ const ExpandingDetails = () => {
       },
       {
         Header: 'Approved Amount',
-        accessor: 'approvedAmount'
+        accessor: 'approvedAmount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       // {
       //   Header: 'Actions',
@@ -398,11 +417,12 @@ const ExpandingDetails = () => {
               onClick={handleAdvanceType}
               size="small"
               disabled={loading}
-              sx={{ height: '36px' }} 
+              sx={{ height: '36px' }}
             >
               {loading ? 'Loading...' : 'View Advance Type'}
             </Button>
           </WrapperButton>
+
           <DateRangeSelect
             startDate={startDate}
             endDate={endDate}
@@ -411,7 +431,7 @@ const ExpandingDetails = () => {
             setSelectedRange={setRange}
             onRangeChange={handleRangeChange}
             showSelectedRangeLabel
-            sx={{ height: '36px', width: '180px', mb: '0px' }} 
+            sx={{ height: '36px', width: '180px', mb: '0px' }}
           />
         </Stack>
       </Stack>

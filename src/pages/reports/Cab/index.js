@@ -15,14 +15,18 @@ import CompanySelection from 'SearchComponents/CompanySelectionAutocomplete';
 import VehicleSelection from 'SearchComponents/VehicleSelectionAutoComplete';
 import { downloadCabWiseReport } from '../utils/DownloadCabWIserReport';
 import TableSkeleton from 'components/tables/TableSkeleton';
+import VendorSelection from 'SearchComponents/VendorSelectionAutoComplete';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const CabReports = () => {
   const [cab, setCab] = useState(null);
   const [selectedCab, setSelectedCab] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState([]);
 
   const { loading, cabReportData } = useSelector((state) => state.report);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     let cabID = null;
@@ -30,16 +34,19 @@ const CabReports = () => {
       cabID = selectedCab.map((cab) => cab._id);
     }
 
+    const selectedVendorID = selectedVendor.map((vendor) => vendor.vendorId);
+
     const payload = {
       data: {
         startDate: formatDateUsingMoment(startDate),
         endDate: formatDateUsingMoment(endDate),
-        vehicleIDs: cabID || []
+        vehicleIDs: cabID || [],
+        vendorIds: selectedVendorID || []
       }
     };
 
     dispatch(fetchCabWiseReports(payload));
-  }, [startDate, endDate, selectedCab]);
+  }, [startDate, endDate, selectedCab, selectedVendor]);
 
   const downloadReports = useCallback(() => {
     console.log('Data = ', cabReportData);
@@ -51,17 +58,22 @@ const CabReports = () => {
       <Stack gap={1}>
         {/* Filter */}
         <Stack direction={'row'} justifyContent={'Space-between'} gap={2} alignItems={'center'}>
-          {/* vehicle Filter */}
-
-          <Stack>
+          <Stack direction={'row'} gap={2} alignItems={'center'}>
+            {/* Vehicle Filter */}
             <Box sx={{ minWidth: '300px' }}>
               <VehicleSelection value={selectedCab} setSelectedOptions={setSelectedCab} sx={{ minWidth: '300px', maxWidth: '600px' }} />
+            </Box>
+            <Box sx={{ minWidth: '300px' }}>
+              {/* Vendor Filter */}
+              <VendorSelection
+                value={selectedVendor}
+                setSelectedOptions={setSelectedVendor}
+                sx={{ minWidth: '300px', maxWidth: '600px' }}
+              />
             </Box>
           </Stack>
 
           <Stack direction={'row'} gap={2}>
-            {/* Download Report */}
-
             {/* Date Filter */}
             <DateRangeSelect
               startDate={startDate}
@@ -72,16 +84,21 @@ const CabReports = () => {
               onRangeChange={handleRangeChange}
               showSelectedRangeLabel
             />
-            <Button
-              variant="contained"
-              startIcon={<DocumentDownload />}
-              color="secondary"
-              onClick={downloadReports}
-              size="medium"
-              title="Download Report"
-            >
-              Download Report
-            </Button>
+
+            {/* Download Report */}
+            <WrapperButton moduleName={MODULE.REPORT} permission={PERMISSIONS.CREATE}>
+              <Button
+                variant="contained"
+                startIcon={<DocumentDownload />}
+                color="secondary"
+                onClick={downloadReports}
+                size="medium"
+                title="Download Report"
+                disabled={loading}
+              >
+                Download Report
+              </Button>
+            </WrapperButton>
           </Stack>
         </Stack>
 

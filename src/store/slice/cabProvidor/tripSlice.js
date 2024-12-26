@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Initial state for the zone names
 const initialState = {
@@ -49,6 +51,9 @@ const tripSlice = createSlice({
     resetError: (state) => {
       state.error = null;
     }
+  },
+  extraReducers: (builder) => {
+    builder.addCase(logoutActivity, handleReset(initialState));
   }
 });
 

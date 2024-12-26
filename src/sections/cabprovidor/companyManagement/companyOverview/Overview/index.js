@@ -14,6 +14,8 @@ const avatarImage = require.context('assets/images/users', true);
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 
 const Overview = ({ data }) => {
+  console.log('data', data);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6} md={6} xl={6}>
@@ -25,8 +27,8 @@ const Overview = ({ data }) => {
                   <Stack spacing={2.5} alignItems="center">
                     <Avatar alt="Avatar 1" size="xl" src={avatarImage(`./default.png`)} />
                     <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">{data?.company_name}</Typography>
-                      <Typography color="secondary">{data?.company_email}</Typography>
+                      <Typography variant="h5">{data?.company_name || 'N/A'}</Typography>
+                      <Typography color="secondary">{data?.company_email || 'N/A'}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -38,7 +40,9 @@ const Overview = ({ data }) => {
                         Billing Address
                       </Typography>
                       <Typography color="secondary">
-                        {data?.address},{data?.city}, {data?.state} - {data?.postal_code}
+                        {data?.address && data?.city && data?.state && data?.postal_code
+                          ? `${data.address}, ${data.city}, ${data.state} - ${data.postal_code}`
+                          : 'N/A'}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -50,7 +54,9 @@ const Overview = ({ data }) => {
                         Shipping Address
                       </Typography>
                       <Typography color="secondary">
-                        {data?.address},{data?.city}, {data?.state} - {data?.postal_code}
+                        {data?.address && data?.city && data?.state && data?.postal_code
+                          ? `${data.address}, ${data.city}, ${data.state} - ${data.postal_code}`
+                          : 'N/A'}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -115,7 +121,7 @@ const Overview = ({ data }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>07AAFCL6776MZ</Typography>
+                                  <Typography>{data?.GSTIN || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -129,7 +135,7 @@ const Overview = ({ data }) => {
                               </Grid>
                               <Grid item xs={12} md={6}>
                                 <Stack spacing={0.5}>
-                                  <Typography>07AAFCL6776MZ</Typography>
+                                  <Typography>{data?.PAN || 'N/A'}</Typography>
                                 </Stack>
                               </Grid>
                             </Grid>
@@ -151,7 +157,8 @@ const Overview = ({ data }) => {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                   <Stack spacing={0.5}>
-                                    <Typography>HDFC</Typography>
+                                    {/* <Typography>HDFC</Typography> */}
+                                    <Typography>N/A</Typography>
                                   </Stack>
                                 </Grid>
                               </Grid>
@@ -165,7 +172,8 @@ const Overview = ({ data }) => {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                   <Stack spacing={0.5}>
-                                    <Typography>Shiv</Typography>
+                                    {/* <Typography>Shiv</Typography> */}
+                                    <Typography>N/A</Typography>
                                   </Stack>
                                 </Grid>
                               </Grid>
@@ -179,7 +187,8 @@ const Overview = ({ data }) => {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                   <Stack spacing={0.5}>
-                                    <Typography>Patel Nagar</Typography>
+                                    {/* <Typography>Patel Nagar</Typography> */}
+                                    <Typography>N/A</Typography>
                                   </Stack>
                                 </Grid>
                               </Grid>
@@ -193,7 +202,8 @@ const Overview = ({ data }) => {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                   <Stack spacing={0.5}>
-                                    <Typography>07AAFCL6776MZ</Typography>
+                                    {/* <Typography>07AAFCL6776MZ</Typography> */}
+                                    <Typography>N/A</Typography>
                                   </Stack>
                                 </Grid>
                               </Grid>

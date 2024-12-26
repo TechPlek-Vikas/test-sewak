@@ -1,6 +1,7 @@
 // material-ui
 import { Grid, Stack, Typography } from '@mui/material';
-import LogoMain from 'components/logo/LogoMain';
+import LogoMain from 'components/logo/logoOrganisation/LogoMain';
+// import LogoMain from 'components/logo/LogoMain';
 import AuthLogin from 'sections/auth/auth-forms/AuthLogin';
 
 // project-imports

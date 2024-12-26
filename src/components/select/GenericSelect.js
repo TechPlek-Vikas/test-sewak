@@ -24,7 +24,7 @@ const GenericSelect = ({
 
   // Determine the current value
   const currentValue = formik ? field?.value : value;
-  console.log(`🚀 ~ currentValue:`, currentValue);
+  // console.log(`🚀 ~ currentValue:`, currentValue);
 
   // Handle the change for Formik and non-Formik forms
   const handleChange = (event) => {

@@ -42,9 +42,35 @@ const roster = {
     {
       id: 'invoices',
       title: <FormattedMessage id="invoices" />,
-      type: 'item',
-      url: '/apps/invoices/list',
-      icon: icons.invoice
+      type: 'collapse',
+      // url: '/apps/invoices/list',
+      icon: icons.invoice,
+      children: [
+        // Company Invoice
+        {
+          id: 'company-invoice',
+          title: <FormattedMessage id="company1" />,
+          type: 'item',
+          url: '/apps/invoices/company',
+          // icon: icons.view
+        },
+        // Vendor Invoice
+        {
+          id: 'vendor-invoice',
+          title: <FormattedMessage id="vendor1" />,
+          type: 'item',
+          url: '/apps/invoices/vendor',
+          // icon: icons.view
+        },
+        // Driver Invoice
+        {
+          id: 'driver-invoice',
+          title: <FormattedMessage id="driver1" />,
+          type: 'item',
+          url: '/apps/invoices/driver',
+          // icon: icons.view
+        }
+      ]
     }
   ]
 };

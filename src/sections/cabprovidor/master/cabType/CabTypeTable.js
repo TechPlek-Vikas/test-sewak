@@ -42,21 +42,24 @@ const CabTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo,loading
       {
         Header: 'Vehicle Type',
         accessor: 'vehicleTypeName',
-        disableSortBy: true
+         Cell: ({ value }) => value || 'N/A'
+        // disableSortBy: true
       },
       {
         Header: 'Description',
         accessor: 'vehicleDescription',
-        disableSortBy: true
+        disableSortBy: true,
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Capacity',
-        accessor: 'capacity'
+        accessor: 'capacity',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Fuel Type',
         accessor: 'fuelType',
-        disableSortBy: true,
+        // disableSortBy: true,
         Cell: ({ row }) => {
           const { values } = row;
           const fuelType = values['fuelType'];
@@ -70,7 +73,7 @@ const CabTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo,loading
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -80,7 +83,7 @@ const CabTypeTable = ({ data, page, setPage, limit, setLimit, lastPageNo,loading
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['updatedAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {

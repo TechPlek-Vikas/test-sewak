@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { USERTYPE } from 'constant';
 import axios from 'utils/axios'; // Adjust the import path according to your project structure
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 const API_URL = {
   REGISTER: '/user/register',
@@ -17,6 +19,12 @@ const API_URL = {
     GETALL: '/vendorUser/list',
     SPECIFIC_DETAILS: {
       CREATE: '/vendorUser/add'
+    }
+  },
+  [USERTYPE.iscabProviderUser]: {
+    GETALL: '/cabProviderUser/all',
+    SPECIFIC_DETAILS: {
+      CREATE: '/cabProviderUser/add'
     }
   }
 };
@@ -245,7 +253,8 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

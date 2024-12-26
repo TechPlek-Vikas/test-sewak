@@ -1,6 +1,6 @@
 {
   "name": "trip-biller",
-  "version": "0.7",
+  "version": "0.9",
   "private": true,
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -77,7 +77,8 @@
     "build-stage": "env-cmd -f .env.qa react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "analyze": "react-scripts build && webpack-bundle-analyzer build/static/js/*.js"
   },
   "eslintConfig": {
     "extends": [
@@ -118,6 +119,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "immutable": "^4.3.0",
     "prettier": "^2.8.8",
-    "react-error-overlay": "6.0.11"
+    "react-error-overlay": "6.0.11",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }

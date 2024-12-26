@@ -3,8 +3,9 @@ import { Chip, Table, TableBody, TableCell, TableHead, TableRow, useTheme } from
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useMemo } from 'react';
-import { useExpanded, useTable } from 'react-table';
+import { useExpanded, useSortBy, useTable } from 'react-table';
 import PaginationBox from 'components/tables/Pagination';
+import { HeaderSort } from 'components/third-party/ReactTable';
 
 const Transaction = ({ data, page, setPage, limit, setLimit, lastPageNo }) => {
   const theme = useTheme();
@@ -19,19 +20,23 @@ const Transaction = ({ data, page, setPage, limit, setLimit, lastPageNo }) => {
       },
       {
         Header: 'Date',
-        accessor: 'startDate'
+        accessor: 'startDate',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Invoice Number',
-        accessor: 'invoiceNumber'
+        accessor: 'invoiceNumber',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Amount',
-        accessor: 'amount'
+        accessor: 'amount',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Balance Due',
-        accessor: 'balanceDue'
+        accessor: 'balanceDue',
+        Cell: ({ value }) => (value === null || value === undefined ? 'N/A' : value)
       },
       {
         Header: 'Status',
@@ -97,17 +102,29 @@ function ReactTable({ columns: userColumns, data }) {
         hiddenColumns: ['_id', 'zoneDescription']
       }
     },
+    useSortBy,
     useExpanded
   );
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      {/* <TableHead>
         {headerGroups.map((headerGroup) => (
           <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
                 {column.render('Header')}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableHead> */}
+      <TableHead>
+        {headerGroups.map((headerGroup) => (
+          <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+            {headerGroup.headers.map((column) => (
+              <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                <HeaderSort column={column} sort />
               </TableCell>
             ))}
           </TableRow>

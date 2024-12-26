@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { openSnackbar } from 'store/reducers/snackbar';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching roster data by some identifier (e.g., `companyId`)
 export const fetchRosterData = createAsyncThunk('rosterData/fetchRosterData', async ({ id, page, limit }, { rejectWithValue }) => {
@@ -153,7 +155,8 @@ const rosterDataSlice = createSlice({
       .addCase(uploadRosterData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

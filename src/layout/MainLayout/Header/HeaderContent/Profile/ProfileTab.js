@@ -30,7 +30,7 @@ const ProfileTab = ({ handleLogout, handleProfileOverview }) => {
         <ListItemText primary="View Profile" />
       </ListItemButton>
 
-      <ListItemButton selected={selectedIndex === 3} onClick={(event) => handleListItemClick(event, 3)}>
+      {/* <ListItemButton selected={selectedIndex === 3} onClick={(event) => handleListItemClick(event, 3)}>
         <ListItemIcon>
           <Profile2User variant="Bulk" size={18} />
         </ListItemIcon>
@@ -41,7 +41,7 @@ const ProfileTab = ({ handleLogout, handleProfileOverview }) => {
           <Card variant="Bulk" size={18} />
         </ListItemIcon>
         <ListItemText primary="Billing" />
-      </ListItemButton>
+      </ListItemButton> */}
       <ListItemButton selected={selectedIndex === 2} onClick={handleLogout}>
         <ListItemIcon>
           <Logout variant="Bulk" size={18} />

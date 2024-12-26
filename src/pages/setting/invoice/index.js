@@ -11,6 +11,8 @@ import { width } from '@mui/system';
 import { getApiResponse } from 'utils/axiosHelper';
 import axios from 'utils/axios';
 import { useDispatch } from 'react-redux';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 export const TAX_TYPE = {
   INDIVIDUAL: 'Individual',
@@ -123,6 +125,8 @@ const InvoiceSetting = ({ redirect, onClose }) => {
             close: true
           })
         );
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -252,14 +256,16 @@ const InvoiceSetting = ({ redirect, onClose }) => {
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Stack direction="row" spacing={2} justifyContent={'flex-end'}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      disabled={formik.isSubmitting}
-                      startIcon={formik.isSubmitting && <CircularProgress size={20} />}
-                    >
-                      {buttonLabel}
-                    </Button>
+                    <WrapperButton moduleName={MODULE.INVOICE_SETTING} permission={PERMISSIONS.CREATE}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={formik.isSubmitting}
+                        startIcon={formik.isSubmitting && <CircularProgress size={20} />}
+                      >
+                        {buttonLabel}
+                      </Button>
+                    </WrapperButton>
                   </Stack>
                 </Box>
               </Stack>

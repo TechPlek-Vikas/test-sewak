@@ -29,6 +29,8 @@ import { openSnackbar } from 'store/reducers/snackbar';
 import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
 import { ThemeMode } from 'config';
 import { Edit } from 'iconsax-react';
+import WrapperButton from 'components/common/guards/WrapperButton';
+import { MODULE, PERMISSIONS } from 'constant';
 
 const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading }) => {
   const theme = useTheme();
@@ -53,7 +55,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Cab Name',
         accessor: 'vehicleName',
-        disableSortBy: true,
+        // disableSortBy: true,
         Cell: ({ row, value }) => {
           const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
           return (
@@ -63,7 +65,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
                 onClick={(e) => e.stopPropagation()} // Prevent interfering with row expansion
                 style={{ textDecoration: 'none' }}
               >
-                {formattedValue}
+                {formattedValue || 'N/A'}
               </Link>
             </Typography>
           );
@@ -71,12 +73,14 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       },
       {
         Header: 'Cab Type',
-        accessor: 'vehicleTypeName'
+        accessor: 'vehicleTypeName',
+        Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Cab Number',
         accessor: 'vehicleNumber',
-        disableSortBy: true
+        Cell: ({ value }) => value || 'N/A'
+        // disableSortBy: true
       },
       {
         Header: 'Driver',
@@ -107,11 +111,11 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Created At',
         accessor: 'createdAt',
-        disableSortBy: true,
+        // disableSortBy: true,
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -198,6 +202,7 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
       {
         Header: 'Compliance Progress',
         accessor: 'progress',
+        disableSortBy: true,
         Cell: ({ row, value }) => {
           const progessValue = Math.floor(Math.random() * 101);
           return <LinearWithLabel value={progessValue} sx={{ minWidth: 75 }} />;
@@ -210,29 +215,31 @@ const CabTable = ({ data, page, setPage, limit, setLimit, lastPageNo, loading })
         Cell: ({ row }) => {
           return (
             <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-              <Tooltip
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
-                      opacity: 0.9
+              <WrapperButton moduleName={MODULE.CAB} permission={PERMISSIONS.CREATE}>
+                <Tooltip
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: mode === ThemeMode.DARK ? theme.palette.grey[50] : theme.palette.grey[700],
+                        opacity: 0.9
+                      }
                     }
-                  }
-                }}
-                title="Edit"
-              >
-                <IconButton
-                  color="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/management/cab/edit/${row.values._id}`);
-                    // dispatch(handleOpen(ACTION.EDIT));
-                    // dispatch(setSelectedID(row.values._id));
                   }}
+                  title="Edit"
                 >
-                  <Edit />
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/management/cab/edit/${row.values._id}`);
+                      // dispatch(handleOpen(ACTION.EDIT));
+                      // dispatch(setSelectedID(row.values._id));
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              </WrapperButton>
 
               {/* <Tooltip
                   componentsProps={{

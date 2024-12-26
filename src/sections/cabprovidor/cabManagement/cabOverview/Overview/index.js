@@ -6,7 +6,6 @@ import { formatDate } from 'utils/helper';
 
 const Overview = () => {
   const { loading, getSingleDetails: cabDetails } = useSelector((state) => state.cabs);
-  console.log(`🚀 ~ Overview ~ cabDetails:`, cabDetails);
 
   return (
     <>
@@ -32,7 +31,7 @@ const Overview = () => {
                               <Typography color="secondary">Cab Name</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{cabDetails?.vehicleName}</Typography>
+                              <Typography>{cabDetails?.vehicleName || "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -44,7 +43,7 @@ const Overview = () => {
                               <Typography color="secondary">Cab Number</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{cabDetails?.vehicleNumber}</Typography>
+                              <Typography>{cabDetails?.vehicleNumber || "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -56,7 +55,7 @@ const Overview = () => {
                               <Typography color="secondary">Cab Type</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{cabDetails?.vehicletype?.vehicleTypeName}</Typography>
+                              <Typography>{cabDetails?.vehicletype?.vehicleTypeName || "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -79,7 +78,7 @@ const Overview = () => {
                               <Typography color="secondary">Fitness Date</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{formatDate(cabDetails?.fitnessDate)}</Typography>
+                              <Typography>{cabDetails?.fitnessDate ? formatDate(cabDetails.fitnessDate) : "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -91,7 +90,7 @@ const Overview = () => {
                               <Typography color="secondary">Insurance Expiry Date</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{formatDate(cabDetails?.insuranceExpiryDate)}</Typography>
+                              <Typography>{cabDetails?.insuranceExpiryDate ? formatDate(cabDetails?.insuranceExpiryDate) : "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -103,7 +102,7 @@ const Overview = () => {
                               <Typography color="secondary">Pollution Expiry Date</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{formatDate(cabDetails?.pollutionExpiryDate)}</Typography>
+                              <Typography>{cabDetails?.pollutionExpiryDate ? formatDate(cabDetails?.pollutionExpiryDate) : "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -115,7 +114,7 @@ const Overview = () => {
                               <Typography color="secondary">Permit Expiry Date (1 year)</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{formatDate(cabDetails?.permitOneYrExpiryDate)}</Typography>
+                              <Typography>{cabDetails?.permitOneYrExpiryDate ? formatDate(cabDetails?.permitOneYrExpiryDate) : "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>
@@ -127,7 +126,7 @@ const Overview = () => {
                               <Typography color="secondary">Permit Expiry Date (5 year&#39;s)</Typography>
                             </Grid>
                             <Grid item xs={12} md={6}>
-                              <Typography>{formatDate(cabDetails?.permitFiveYrExpiryDate)}</Typography>
+                              <Typography>{cabDetails?.permitFiveYrExpiryDate ? formatDate(cabDetails?.permitFiveYrExpiryDate) : "N/A"}</Typography>
                             </Grid>
                           </Grid>
                         </ListItem>

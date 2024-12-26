@@ -134,11 +134,13 @@ const ZoneTable = ({ data, updateKey, setUpdateKey, loading }) => {
       },
       {
         Header: 'Zone Name',
-        accessor: 'zoneName'
+        accessor: 'zoneName',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Zone Description',
-        accessor: 'zoneDescription'
+        accessor: 'zoneDescription',
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Created At',
@@ -147,7 +149,7 @@ const ZoneTable = ({ data, updateKey, setUpdateKey, loading }) => {
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['createdAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {
@@ -157,7 +159,7 @@ const ZoneTable = ({ data, updateKey, setUpdateKey, loading }) => {
         Cell: ({ row }) => {
           const { values } = row;
           const time = values['updatedAt'];
-          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : ''}</>;
+          return <>{time ? formattedDate(time, 'DD MMMM YYYY, hh:mm A') : 'N/A'}</>;
         }
       },
       {

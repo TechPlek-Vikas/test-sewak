@@ -32,11 +32,12 @@ const tabConfig = [
   { label: 'Overview', icon: <Book />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Trips', icon: <Routing2 />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Invoice', icon: <Bill />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
-  { label: 'Attached Vendors', icon: <Profile2User />, access: [USERTYPE.iscabProvider] },
-  { label: 'Attached Drivers', icon: <Car />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
+  // { label: 'Vendor Rate', icon: <Profile2User />, access: [USERTYPE.iscabProvider] },
+  // { label: 'Driver Rate', icon: <Car />, access: [USERTYPE.iscabProvider] },
   { label: 'View Roster', icon: <MenuBoard />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] },
   { label: 'Company Rate', icon: <Card />, access: [USERTYPE.iscabProvider, USERTYPE.isVendor] }
 ];
+
 
 const CompanyOverview = () => {
   const { id } = useParams();

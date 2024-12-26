@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -29,6 +29,9 @@ const MainLayout = () => {
   const { container, miniDrawer, menuOrientation } = useConfig();
 
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
+
+  const location = useLocation();
+  console.log(`🚀 ~ MainLayout ~ location:`, location)
 
   // set media wise responsive drawer
   useEffect(() => {

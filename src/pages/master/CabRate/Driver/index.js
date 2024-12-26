@@ -38,6 +38,7 @@ import { fetchAllDrivers, fetchDrivers } from 'store/slice/cabProvidor/driverSli
 import axios from 'utils/axios';
 import { formatDateUsingMoment, getNestedComplexProperty } from 'utils/helper';
 import moment from 'moment';
+import TemplateSelectDialog from 'sections/rateUpload/driverRate/TemplateSelectDialog';
 
 const getInitialValue = (data) => {
   return data ? {} : { driverId: [], rateData: [] };
@@ -420,8 +421,35 @@ const AddCabRateDriver = () => {
     setFieldValue(name, value);
   };
 
+  const [openCompanyRateUploadDialog, setOpenCompanyRateUploadDialog] = useState(false);
+
+  const handleCompanyRateUploadOpen = () => {
+    setOpenCompanyRateUploadDialog(true);
+  };
+  const handleCompanyRateUploadClose = () => {
+    setOpenCompanyRateUploadDialog(false);
+  };
+
   return (
     <>
+     <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-end'} sx={{mb:2}}>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<Add />}
+          onClick={handleCompanyRateUploadOpen}
+          size="small"
+          // disabled={loading}
+        >
+          {' Upload'}
+        </Button>
+      </Stack>
+      <TemplateSelectDialog
+        open={openCompanyRateUploadDialog}
+        handleOpen={handleCompanyRateUploadOpen}
+        handleClose={handleCompanyRateUploadClose}
+        // setKey={setKey}
+      />
       <FormikProvider value={formik}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Form autoComplete="off" onSubmit={handleSubmit}>

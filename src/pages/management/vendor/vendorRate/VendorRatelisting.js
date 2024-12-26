@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // assets
 import {
   Autocomplete,
@@ -63,12 +63,12 @@ const AddVendorRateDialog = ({
 
     handleSelectedCompanyName(selectedCompanyName);
     handleSelectedVendorName(selectedVendorName);
-    onClose();
+    onClose(true);
   };
 
   const onCancel = () => {
     onClose();
-    navigate('/management/vendor/view');
+    // navigate('/management/vendor/view');
   };
 
   return (
@@ -84,10 +84,6 @@ const AddVendorRateDialog = ({
       <DialogTitle>Select Company and Vendor</DialogTitle>
       <DialogContent>
         <Grid container spacing={1} sx={{ padding: '8px' }}>
-          <Grid item xs={6}>
-            <InputLabel sx={{ marginBottom: '4px' }}>Company Name</InputLabel>
-            <SearchComponent setSelectedCompany={setSelectedCompanyLocal} />
-          </Grid>
           <Grid item xs={6}>
             <InputLabel sx={{ marginBottom: '4px' }}>Vendor</InputLabel>
             <Autocomplete
@@ -116,10 +112,15 @@ const AddVendorRateDialog = ({
               fullWidth
             />
           </Grid>
+
+          <Grid item xs={6}>
+            <InputLabel sx={{ marginBottom: '4px' }}>Company Name</InputLabel>
+            <SearchComponent setSelectedCompany={setSelectedCompanyLocal} />
+          </Grid>
         </Grid>
       </DialogContent>
       <DialogActions sx={{ padding: '8px' }}>
-        <Button onClick={onCancel} color="secondary">
+        <Button onClick={onClose} color="secondary">
           Cancel
         </Button>
         <Button onClick={handleSave} color="primary" disabled={!selectedCompany || !vendorID}>
@@ -151,6 +152,7 @@ const VendorRatelisting = () => {
   const [selectedCompanyName, setSelectedCompanyName] = useState('');
   const [selectedVendorName, setSelectedVendorName] = useState('');
   const [isSelectingCompany, setIsSelectingCompany] = useState(false);
+  const searchRef = useRef(null);
 
   const handleSelectedCompanyName = (companyName) => {
     setSelectedCompanyName(companyName);
@@ -184,9 +186,9 @@ const VendorRatelisting = () => {
     navigate('/management/vendor/add-vendor-rate');
   };
 
-  const handleDialogClose = () => {
+  const handleDialogClose = (flag = false) => {
     setDialogOpen(false);
-    // navigate('/management/vendor/view');
+    !flag && navigate('/management/vendor/view', { replace: true });
   };
 
   const handleCompanySelect = (company) => {
@@ -207,6 +209,28 @@ const VendorRatelisting = () => {
     { title: 'Vendor Rates' }
   ];
 
+  // Close SearchComponent when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click is inside the search component or its dropdown
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        !document.querySelector('.MuiAutocomplete-popper')?.contains(event.target)
+      ) {
+        setIsSelectingCompany(false);
+      }
+    };
+
+    if (isSelectingCompany) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSelectingCompany]);
+
   return (
     <>
       {/* Company selection dialog */}
@@ -223,15 +247,15 @@ const VendorRatelisting = () => {
       {/* Render CompanyRateListing once a company is selected */}
       {!dialogOpen && selectedCompany && selectedVendorID && !showCompanyList ? (
         <>
-        <Breadcrumbs custom links={breadcrumbLinks} />
-        <Stack gap={1} spacing={1}>
-          {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
+          <Breadcrumbs custom links={breadcrumbLinks} />
+          <Stack gap={1} spacing={1}>
+            {/* <Header OtherComp={({ loading }) => <ButtonComponent loading={loading} onAddRate={handleAddRate} />} /> */}
 
-          <MainCard
-            title={
-              <Stack direction="row" alignItems="center" gap={1}>
-                Vendor Rates between{' '}
-                {/* <SearchComponent
+            <MainCard
+              title={
+                <Stack direction="row" alignItems="center" gap={1}>
+                  Vendor Rates between{' '}
+                  {/* <SearchComponent
                   setSelectedCompany={(company) => {
                     console.log("company",company);
                     
@@ -240,33 +264,35 @@ const VendorRatelisting = () => {
                   }}
                   sx={{ width: '200px'}}
                 />{' '} */}
-                <>
-                  {isSelectingCompany ? (
-                    <SearchComponent setSelectedCompany={handleCompanySelect} sx={{ width: '200px' }} />
-                  ) : (
-                    <Chip
-                      label={selectedCompanyName || 'Select a company'}
-                      color="primary"
-                      onClick={() => setIsSelectingCompany(true)} // Open the search component on click
-                    />
-                  )}
-                </>
-                and <Chip label={selectedVendorName} color="secondary" />
-              </Stack>
-            }
-          >
-            <VendorRateTable
-              data={vendorList}
-              page={page}
-              setPage={setPage}
-              limit={limit}
-              setLimit={setLimit}
-              updateKey={updateKey}
-              setUpdateKey={setUpdateKey}
-              loading={loading}
-            />
-          </MainCard>
-        </Stack>
+                  <>
+                    {isSelectingCompany ? (
+                      <div ref={searchRef}>
+                        <SearchComponent setSelectedCompany={handleCompanySelect} sx={{ width: '200px' }} />
+                      </div>
+                    ) : (
+                      <Chip
+                        label={selectedCompanyName || 'Select a company'}
+                        color="primary"
+                        onClick={() => setIsSelectingCompany(true)} // Open the search component on click
+                      />
+                    )}
+                  </>
+                  and <Chip label={selectedVendorName} color="secondary" />
+                </Stack>
+              }
+            >
+              <VendorRateTable
+                data={vendorList}
+                page={page}
+                setPage={setPage}
+                limit={limit}
+                setLimit={setLimit}
+                updateKey={updateKey}
+                setUpdateKey={setUpdateKey}
+                loading={loading}
+              />
+            </MainCard>
+          </Stack>
         </>
       ) : null}
     </>

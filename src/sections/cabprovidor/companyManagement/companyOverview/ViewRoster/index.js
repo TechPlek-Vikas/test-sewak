@@ -45,7 +45,7 @@ const ViewRoster = ({ companyId }) => {
   // const [loading, setLoading] = useState(false);
   const { rosterFiles, metaData, loading, error } = useSelector((state) => state.rosterFile);
 
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -143,41 +143,41 @@ const ViewRoster = ({ companyId }) => {
         Header: 'Company Name',
         accessor: 'companyId',
         Cell: ({ row }) => {
-          return <Typography>{row.original.companyId?.company_name}</Typography>;
+          return <Typography>{row.original.companyId?.company_name || 'N/A'}</Typography>;
         }
       },
       {
         Header: 'Start Date',
-        accessor: (row) => (row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : '')
+        accessor: (row) => (row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : 'N/A')
       },
       {
         Header: 'End Date',
-        accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : '')
+        accessor: (row) => (row.endDate ? new Date(row.endDate).toLocaleDateString('en-IN') : 'N/A')
       },
       {
         Header: 'Entries',
         accessor: 'totalCount',
         Cell: ({ row }) => {
-          return <Typography>{row.original.totalCount}</Typography>;
+          return <Typography>{row.original.totalCount ?? 'N/A' }</Typography>;
         }
       },
       {
         Header: 'Trips',
         accessor: 'totalCountWithStatus3',
         Cell: ({ row }) => {
-          return <Typography>{row.original.totalCountWithStatus3}</Typography>;
+          return <Typography>{row.original.totalCountWithStatus3 ?? 'N/A'}</Typography>;
         }
       },
       {
         Header: 'Added By',
         accessor: 'addedBy',
         Cell: ({ row }) => {
-          return <Typography>{row.original.addedBy?.userName}</Typography>;
+          return <Typography>{row.original.addedBy?.userName || 'N/A'}</Typography>;
         }
       },
       {
         Header: 'Upload Date',
-        accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : '')
+        accessor: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : 'N/A')
       },
       {
         Header: 'Status',
@@ -345,6 +345,7 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
+    useSortBy,
     useExpanded, // Retain for row expansion
     usePagination, // Retain for pagination functionality
     useRowSelect // Retain if row selection is needed
@@ -354,12 +355,23 @@ function ReactTable({ columns, data, renderRowSubComponent }) {
     <>
       <Stack spacing={3}>
         <Table {...getTableProps()}>
-          <TableHead>
+          {/* <TableHead>
             {headerGroups.map((headerGroup) => (
               <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
                 {headerGroup.headers.map((column) => (
                   <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
                     {column.render('Header')}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableHead> */}
+          <TableHead>
+            {headerGroups.map((headerGroup) => (
+              <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                {headerGroup.headers.map((column) => (
+                  <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                    <HeaderSort column={column} sort />
                   </TableCell>
                 ))}
               </TableRow>

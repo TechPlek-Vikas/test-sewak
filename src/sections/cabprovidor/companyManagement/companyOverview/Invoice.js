@@ -1,5 +1,30 @@
 import PropTypes from 'prop-types';
-import { alpha, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fade, IconButton, Link, Menu, MenuItem, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography, useTheme } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Fade,
+  IconButton,
+  Link,
+  Menu,
+  MenuItem,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { Fragment, useEffect, useMemo, useState } from 'react';
@@ -21,25 +46,25 @@ import { useNavigate } from 'react-router';
 import { ThemeMode } from 'config';
 
 const API_URL = {
-    [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
-    [USERTYPE.isVendor]: '/invoice/all/vendor'
-  };
+  [USERTYPE.iscabProvider]: '/invoice/by/cabProviderId',
+  [USERTYPE.isVendor]: '/invoice/all/vendor'
+};
 
 const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
   const theme = useTheme();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const userType = useSelector((state) => state.auth.userType);
-  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.THIS_MONTH);
+  const { startDate, endDate, range, setRange, handleRangeChange, prevRange } = useDateRange(TYPE_OPTIONS.LAST_30_DAYS);
 
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axiosServices.get(API_URL[userType],{
-            params: {
-              companyId: companyId,
-            }
-          });
+        const response = await axiosServices.get(API_URL[userType], {
+          params: {
+            companyId: companyId
+          }
+        });
 
         setData(response.data.data);
         setMetadata(response.data?.metaData || {});
@@ -72,7 +97,8 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
       {
         Header: 'Invoice Id',
         accessor: 'invoiceNumber',
-        disableFilters: true
+        disableFilters: true,
+         Cell: ({ value }) => value || 'N/A'
       },
       {
         Header: 'Billed To',
@@ -84,9 +110,9 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
             <Stack direction="row" spacing={1.5} alignItems="center">
               {/* <Avatar alt="Avatar" size="sm" src={avatarImage(`./avatar-${!values.avatar ? 1 : values.avatar}.png`)} /> */}
               <Stack spacing={0}>
-                <Typography variant="subtitle1">{values.billedTo.company_name}</Typography>
+                <Typography variant="subtitle1">{values.billedTo.company_name || 'N/A'}</Typography>
                 <Typography variant="caption" color="textSecondary">
-                  {values.billedTo.company_email}
+                  {values.billedTo.company_email || 'N/A'}
                 </Typography>
               </Stack>
             </Stack>
@@ -97,21 +123,21 @@ const Invoice = ({ page, setPage, limit, setLimit, lastPageNo, companyId }) => {
         Header: 'Invoice Date',
         accessor: 'invoiceDate',
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Due Date',
         accessor: 'dueDate',
         Cell: ({ value }) => {
-          return formattedDate(value, 'DD/MM/YYYY');
+          return formattedDate(value || 'N/A', 'DD/MM/YYYY');
         }
       },
       {
         Header: 'Amount',
         accessor: 'grandTotal',
         Cell: ({ value }) => {
-          return <Typography>₹ {value}</Typography>;
+          return <Typography>₹ {(value === null || value === undefined ? 'N/A' : value)}</Typography>;
         }
       },
       {
@@ -356,11 +382,7 @@ export default Invoice;
 
 // ==============================|| REACT TABLE ||============================== //
 
-function ReactTable({
-  columns,
-  data,
-  renderRowSubComponent,
-}) {
+function ReactTable({ columns, data, renderRowSubComponent }) {
   const theme = useTheme();
 
   const {
@@ -373,7 +395,7 @@ function ReactTable({
     page,
     gotoPage,
     setPageSize,
-    state: { pageIndex, pageSize, expanded },
+    state: { pageIndex, pageSize, expanded }
   } = useTable(
     {
       columns,
@@ -381,11 +403,12 @@ function ReactTable({
       initialState: {
         pageIndex: 0,
         pageSize: 10,
-        hiddenColumns: ['_id'], // Keep this to hide specific columns if needed
-      },
+        hiddenColumns: ['_id'] // Keep this to hide specific columns if needed
+      }
     },
     useGlobalFilter, // Retain if global filtering is required
     useFilters, // Retain if individual column filtering is needed
+    useSortBy,
     useExpanded, // Retain for row expansion
     usePagination, // Retain for pagination functionality
     useRowSelect // Retain if row selection is needed
@@ -395,12 +418,23 @@ function ReactTable({
     <>
       <Stack spacing={3}>
         <Table {...getTableProps()}>
-          <TableHead>
+          {/* <TableHead>
             {headerGroups.map((headerGroup) => (
               <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
                 {headerGroup.headers.map((column) => (
                   <TableCell key={column.id} {...column.getHeaderProps([{ className: column.className }])}>
                     {column.render('Header')}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableHead> */}
+          <TableHead>
+            {headerGroups.map((headerGroup) => (
+              <TableRow key={headerGroup} {...headerGroup.getHeaderGroupProps()} sx={{ '& > th:first-of-type': { width: '58px' } }}>
+                {headerGroup.headers.map((column) => (
+                  <TableCell key={column} {...column.getHeaderProps([{ className: column.className }])}>
+                    <HeaderSort column={column} sort />
                   </TableCell>
                 ))}
               </TableRow>
@@ -439,7 +473,7 @@ function ReactTable({
               );
             })}
             <TableRow sx={{ '&:hover': { bgcolor: 'transparent !important' } }}>
-              <TableCell sx={{ p: 2}} colSpan={10}>
+              <TableCell sx={{ p: 2 }} colSpan={10}>
                 <TablePagination gotoPage={gotoPage} rows={rows} setPageSize={setPageSize} pageSize={pageSize} pageIndex={pageIndex} />
               </TableCell>
             </TableRow>
@@ -460,4 +494,3 @@ ReactTable.propTypes = {
   csvExport: PropTypes.bool,
   buttonTitle: PropTypes.string.isRequired
 };
-

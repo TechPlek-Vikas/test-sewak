@@ -33,11 +33,11 @@ export default function AlertDelete1({ title, open, handleClose, handleConfirm }
               Are you sure you want to delete?
             </Typography>
             <Typography align="center">
-              By deleting
-              <Typography variant="subtitle1" component="span">
-                {' '}
-                &quot;{title}&quot;{' '}
-              </Typography>
+              {/* By deleting */}
+              {/* <Typography variant="subtitle1" component="span">
+                {' '} */}
+                {title}
+              {/* </Typography> */}
             </Typography>
           </Stack>
 

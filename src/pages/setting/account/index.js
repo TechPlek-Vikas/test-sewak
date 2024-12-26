@@ -4,19 +4,20 @@ import CustomCircularLoader from 'components/CustomCircularLoader';
 import Loadable from 'components/Loadable';
 import { lazy, useState, useCallback, useEffect } from 'react';
 import { dispatch } from 'store';
+import { openSnackbar } from 'store/reducers/snackbar';
 import { addAccountSetting, fetchAccountSettings } from 'store/slice/cabProvidor/accountSettingSlice';
 
 const ManageAccountSettings = Loadable(lazy(() => import('pages/setting/account/ManageAccountSettings')));
 
-export const FAKE_ACCOUNT_SETTINGS = {
-  name: 'Ram',
-  title: 'Ram Travels',
-  logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Kim_Jong-un_April_2019_%28cropped%29.jpg',
-  smallLogo: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTri4LTaGmAlYGNUVKjevQgLD5F_nbTsXvr5A&s`,
-  favIcon: 'https://cdn4.vectorstock.com/i/1000x1000/28/08/north-korea-flag-icon-isolate-print-vector-30902808.jpg'
-};
+// export const FAKE_ACCOUNT_SETTINGS = {
+//   name: 'Ram',
+//   title: 'Ram Travels',
+//   logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Kim_Jong-un_April_2019_%28cropped%29.jpg',
+//   smallLogo: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTri4LTaGmAlYGNUVKjevQgLD5F_nbTsXvr5A&s`,
+//   favIcon: 'https://cdn4.vectorstock.com/i/1000x1000/28/08/north-korea-flag-icon-isolate-print-vector-30902808.jpg'
+// };
 
-export const FAKE_ACCOUNT_SETTINGS_2 = null;
+// export const FAKE_ACCOUNT_SETTINGS_2 = null;
 
 const AccountSettings = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -58,8 +59,8 @@ const AccountSettings = () => {
             setMessage("You don't have any account settings yet. Please add your account settings.");
             return;
           }
-          setData(response.data);
-          dispatch(addAccountSetting(response.data));
+          setData(response.data.data);
+          // dispatch(addAccountSetting(response.data));
           setIsSettingsVisible(true);
         }
       } catch (error) {
@@ -111,7 +112,7 @@ const AccountSettings = () => {
             setIsSettingsVisible(true);
           }}
         />
-      )}
+       )} 
     </>
   );
 };

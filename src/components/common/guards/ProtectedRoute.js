@@ -12,7 +12,7 @@ import { isPermissionGranted } from 'layout/MainLayout/Drawer/DrawerContent/Navi
  * @param {string} permission - The required permission for the module.
  * @returns {React.Component|Navigate} - Renders the component if permission exists, or redirects otherwise.
  */
-const ProtectedRoute = ({ element: Component, moduleName, permission, modulePermissions, redirectURL = '/dashboard' }) => {
+const ProtectedRoute = ({ element: Component, moduleName, permission, modulePermissions, redirectURL = '/home' }) => {
   let hasPermission = false;
   const { userPermissions } = useSelector((state) => state.auth);
 

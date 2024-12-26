@@ -12,20 +12,79 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
   const [query, setQuery] = useState(''); // Tracks input query
   const [cache, setCache] = useState({}); // Cache for query results
 
+  console.log("options",options);
+
   // Fetch default options when the dropdown is opened
+  // useEffect(() => {
+  //   const fetchDefaultOptions = async () => {
+  //     if (cache.default) {
+  //       // Use cached default options if available
+  //       setOptions(cache.default);
+  //       return;
+  //     }
+
+  //     setLoading(true);
+  //     try {
+  //       const response = await axiosServices.get('/vehicle/all/linked/drivers');
+  //       const vehicles = response.data.data;
+  //       console.log("vehicles",vehicles);
+        
+  //       setOptions(vehicles);
+  //       setCache((prevCache) => ({ ...prevCache, default: vehicles })); // Cache default results
+  //     } catch (error) {
+  //       console.error('Error fetching default options:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   if (open) {
+  //     fetchDefaultOptions();
+  //   }
+  // }, [open, cache.default]);
+
+  // Fetch options based on query with caching
+  // useEffect(() => {
+  //   if (!query) return;
+
+  //   if (cache[query]) {
+  //     // Use cached results if available
+  //     setOptions(cache[query]);
+  //     return;
+  //   }
+
+  //   const fetchOptions = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await axiosServices.get(`/vehicle/search?filter=${query}`);
+  //       const vehicles = response.data.data;
+
+  //       setOptions(vehicles);
+  //       setCache((prevCache) => ({ ...prevCache, [query]: vehicles })); // Cache query results
+  //     } catch (error) {
+  //       console.error('Error fetching options:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   const debounceFetch = setTimeout(fetchOptions, 300); // Debounce API call
+
+  //   return () => clearTimeout(debounceFetch); // Cleanup debounce timer
+  // }, [query, cache]);
+
+  // Fetch default options when dropdown is opened
   useEffect(() => {
     const fetchDefaultOptions = async () => {
       if (cache.default) {
-        // Use cached default options if available
         setOptions(cache.default);
         return;
       }
 
       setLoading(true);
       try {
-        const response = await axiosServices.get('/vehicle/all/linked/drivers');
-        const vehicles = response.data.data;
-
+        const response = await axiosServices.get(`/vehicle/all?page=1&limit=10`);
+        const vehicles = response.data.data.result;
         setOptions(vehicles);
         setCache((prevCache) => ({ ...prevCache, default: vehicles })); // Cache default results
       } catch (error) {
@@ -40,7 +99,6 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
     }
   }, [open, cache.default]);
 
-  // Fetch options based on query with caching
   useEffect(() => {
     if (!query) return;
 
@@ -53,11 +111,11 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        const response = await axiosServices.get(`/vehicle/search?filter=${query}`);
-        const vehicles = response.data.data;
+        const response = await axiosServices.get(`/vehicle/all?vehicleNumber=${query}`);
+        const companies = response.data.data.result;
 
-        setOptions(vehicles);
-        setCache((prevCache) => ({ ...prevCache, [query]: vehicles })); // Cache query results
+        setOptions(companies);
+        setCache((prevCache) => ({ ...prevCache, [query]: companies })); // Cache query results
       } catch (error) {
         console.error('Error fetching options:', error);
       } finally {
@@ -65,9 +123,9 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
       }
     };
 
-    const debounceFetch = setTimeout(fetchOptions, 300); // Debounce API call
+    const debounceFetch = setTimeout(fetchOptions, 300); // Debounce delay
 
-    return () => clearTimeout(debounceFetch); // Cleanup debounce timer
+    return () => clearTimeout(debounceFetch); // Cleanup on unmount or re-render
   }, [query, cache]);
 
   return (
@@ -107,6 +165,17 @@ const VehicleFilter = ({ setFilterOptions, sx, value }) => {
               )
             }}
           />
+        )}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            <div>
+              {option.vehicleNumber || 'N/A'}
+              <br />
+              <span style={{ fontSize: 'smaller', color: 'gray' }}>
+                {option?.vehicleTypeName || 'N/A'}
+              </span>
+            </div>
+          </li>
         )}
       />
     </Grid>

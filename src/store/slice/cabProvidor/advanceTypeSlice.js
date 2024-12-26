@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
+import { logoutActivity } from './accountSettingSlice';
+import { handleReset } from 'utils/helper';
 
 // Define the async thunk for fetching advance types
 export const fetchAdvanceType = createAsyncThunk('advanceType/fetchAdvanceType', async (id, { rejectWithValue }) => {
@@ -129,7 +131,8 @@ const advanceTypeSlice = createSlice({
       .addCase(deleteAdvanceType.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
-      });
+      })
+      .addCase(logoutActivity, handleReset(initialState));
   }
 });
 

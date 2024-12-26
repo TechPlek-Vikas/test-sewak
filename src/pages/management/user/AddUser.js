@@ -188,6 +188,7 @@ const AddUser = () => {
       try {
         if (activeStep === 0) {
           console.log('Tina = ', formik.isValid);
+          const id = userType === USERTYPE.iscabProvider ? USERTYPE.iscabProviderUser : USERTYPE.isVendorUser;
           const formData = new FormData();
           formData.append('userImage', values.userImage);
           formData.append('userName', values.userName);
@@ -195,7 +196,7 @@ const AddUser = () => {
           formData.append('userPassword', values.userPassword);
           formData.append('contactNumber', values.contactNumber);
           formData.append('alternateContactNumber', values.alternateContactNumber);
-          formData.append('userType', 7);
+          formData.append('userType', id);
           formData.append('pinCode', values.pinCode);
           formData.append('city', values.city);
           formData.append('state', values.state);
@@ -302,7 +303,7 @@ const AddUser = () => {
       userEmail: true,
       userPassword: true,
       userConfirmPassword: true,
-      roleId : true,
+      roleId: true
     });
     if (isValid) {
       handleSubmit();

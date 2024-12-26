@@ -37,22 +37,19 @@ const basicDataValidationSchema = Yup.object({
 const specificDataValidationSchema = Yup.object({
   cabProviderLegalName: Yup.string().required('Cab Provider Legal Name is required'),
   contactPersonName: Yup.string(),
-  PAN: Yup.string()
-  .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN'),
+  PAN: Yup.string().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN'),
   GSTIN: Yup.string()
     .required('GSTIN is required')
     .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{3}$/, 'Invalid GSTIN'),
   officeAddress: Yup.string(),
   officeCity: Yup.string(),
   officeState: Yup.string(),
-  officePinCode: Yup.string()
-  .matches(/^\d{6}$/, 'Invalid Pin Code'),
+  officePinCode: Yup.string().matches(/^\d{6}$/, 'Invalid Pin Code'),
   workEmail: Yup.string().required('Work Email is required').email('Invalid email'),
   workMobileNumber: Yup.string()
     .required('Mobile Number is required')
     .matches(/^\d{10}$/, 'Invalid Mobile Number'),
-  workLandLineNumber: Yup.string()
-  .matches(/^\d{10}$/, 'Invalid Landline Number'),
+  workLandLineNumber: Yup.string().matches(/^\d{10}$/, 'Invalid Landline Number'),
   bankName: Yup.string(),
   accountNumber: Yup.string().matches(/^\d+$/, 'Invalid Account Number'),
   accountHolderName: Yup.string(),
@@ -422,33 +419,35 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                       <Typography variant="h6" color="primary">
                         Username
                       </Typography>
-                      <Typography color="secondary">{basicData.userName}</Typography>
+                      <Typography color="secondary">{basicData.userName || 'N/A'}</Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="h6" color="primary">
                         Email
                       </Typography>
-                      <Typography color="secondary">{basicData.userEmail}</Typography>
+                      <Typography color="secondary">{basicData.userEmail || 'N/A'}</Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="h6" color="primary">
                         Address
                       </Typography>
                       <Typography color="secondary">
-                        {basicData.address}, {basicData.city}, {basicData.state} - {basicData.pinCode}
+                        {basicData?.address && basicData?.city && basicData?.state && basicData?.pinCode
+                          ? `${basicData.address}, ${basicData.city}, ${basicData.state} - ${basicData.pinCode}`
+                          : 'N/A'}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="h6" color="primary">
                         Phone Number
                       </Typography>
-                      <Typography color="secondary">{basicData.contactNumber}</Typography>
+                      <Typography color="secondary">{basicData.contactNumber || 'N/A'}</Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="h6" color="primary">
                         Alternate Phone Number
                       </Typography>
-                      <Typography color="secondary">{basicData.alternateContactNumber}</Typography>
+                      <Typography color="secondary">{basicData.alternateContactNumber || 'N/A'}</Typography>
                     </Grid>
                   </>
                 )}
@@ -699,7 +698,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.cabProviderLegalName}</Typography>
+                                        <Typography>{specificData?.cabProviderLegalName || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -713,7 +712,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.contactPersonName}</Typography>
+                                        <Typography>{specificData?.contactPersonName || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -727,7 +726,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.PAN}</Typography>
+                                        <Typography>{specificData?.PAN || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -741,7 +740,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.GSTIN}</Typography>
+                                        <Typography>{specificData?.GSTIN || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -759,8 +758,12 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                               Office Address
                             </Typography>
                             <Typography color="secondary">
-                              {specificData?.officeAddress}, {specificData?.officeCity},{specificData?.officeState} -{' '}
-                              {specificData?.officePinCode}
+                              {specificData?.officeAddress &&
+                              specificData?.officeCity &&
+                              specificData?.officeState &&
+                              specificData?.officePinCode
+                                ? `${specificData.officeAddress}, ${specificData.officeCity}, ${specificData.officeState} - ${specificData.officePinCode}`
+                                : 'N/A'}
                             </Typography>
                           </Stack>
                         </Stack>
@@ -783,7 +786,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.workEmail}</Typography>
+                                        <Typography>{specificData?.workEmail || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -797,7 +800,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.workMobileNumber}</Typography>
+                                        <Typography>{specificData?.workMobileNumber || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -811,7 +814,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.workLandLineNumber}</Typography>
+                                        <Typography>{specificData?.workLandLineNumber || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -832,7 +835,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.bankName}</Typography>
+                                        <Typography>{specificData?.bankName || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -846,7 +849,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.accountNumber}</Typography>
+                                        <Typography>{specificData?.accountNumber || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -860,7 +863,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.accountHolderName}</Typography>
+                                        <Typography>{specificData?.accountHolderName || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -874,7 +877,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.branchName}</Typography>
+                                        <Typography>{specificData?.branchName || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -888,7 +891,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.IFSC_code}</Typography>
+                                        <Typography>{specificData?.IFSC_code || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
@@ -902,7 +905,7 @@ const Overview = ({ profileBasicData, profileSpecificData }) => {
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                       <Stack spacing={0.5}>
-                                        <Typography>{specificData?.bankAddress}</Typography>
+                                        <Typography>{specificData?.bankAddress || 'N/A'}</Typography>
                                       </Stack>
                                     </Grid>
                                   </Grid>
